@@ -265,6 +265,12 @@ body.modo-admin #dots, body.modo-admin #app{ display:none !important; }
   width:100%; border:8px solid #fff; box-shadow:0 6px 18px rgba(0,0,0,.18); border-radius:2px; margin-top:6px;
 }
 .modal-video{ width:100%; border-radius:10px; margin-top:6px; box-shadow:0 6px 18px rgba(0,0,0,.18); background:#000; }
+.modal-video-wrap{
+  position:relative; width:100%; padding-top:56.25%;
+  border-radius:10px; overflow:hidden; margin-top:6px;
+  box-shadow:0 6px 18px rgba(0,0,0,.18); background:#000;
+}
+.modal-video-wrap iframe{ position:absolute; inset:0; width:100%; height:100%; border:0; }
 .modal-link-btn{
   display:inline-block; margin-top:10px; text-decoration:none;
   background:var(--vermelho-detalhe); color:#fff; font-weight:700; font-size:14px;
@@ -539,6 +545,13 @@ body.modo-admin #adminPanel{ display:block; }
 .admin-topo{ display:flex; justify-content:space-between; align-items:center; max-width:520px; margin:0 auto 18px; }
 .admin-topo h1{ font-family:var(--font-titulo); color:var(--vermelho-detalhe); font-size:19px; margin:0; }
 .admin-preview-img{ max-width:100%; max-height:160px; border-radius:10px; display:block; margin-top:8px; box-shadow:0 4px 14px rgba(0,0,0,.15); }
+.admin-video-preview{
+  position:relative; width:100%; padding-top:56.25%; margin-top:8px;
+  border-radius:10px; overflow:hidden; background:#000; box-shadow:0 4px 14px rgba(0,0,0,.15);
+}
+.admin-video-preview iframe,
+.admin-video-preview video{ position:absolute; inset:0; width:100%; height:100%; border:0; }
+.admin-mp3-atual{ font-size:12.5px; color:var(--texto-suave); margin-top:6px; }
 .admin-cartao-mural{ border:1.5px solid #f3e2e9; border-radius:14px; padding:14px; margin-bottom:14px; background:#fffaf9; }
 .admin-cartao-mural h3{ font-size:14px; margin:0 0 10px; color:var(--vermelho-detalhe); }
 .admin-campos-tipo{ display:none; }
@@ -754,7 +767,6 @@ const firebaseConfig = {
   apiKey: "AIzaSyD2SBA5QH6PodCex65QFx_EyvvnlkMR0-Q",
   authDomain: "site-carol-540a7.firebaseapp.com",
   projectId: "site-carol-540a7",
-  storageBucket: "site-carol-540a7.firebasestorage.app",
   messagingSenderId: "820786141089",
   appId: "1:820786141089:web:e537852b5c5f9bc8e75de0"
 };
@@ -763,6 +775,10 @@ const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 const auth = getAuth(app);
 const CONFIG_REF = doc(db, "config", "site");
+// Documento separado só pra guardar os mp3 em base64 (evita estourar o
+// limite de 1MB do documento principal "config/site" quando alguém
+// adiciona uma música).
+const MP3_REF_COLECAO = "mp3";
 
 window.PedacinhoFirebase = {
   async carregarConfigUmaVez(){
@@ -789,6 +805,22 @@ window.PedacinhoFirebase = {
   },
   async logout(){
     return signOut(auth);
+  },
+  // Salva o mp3 (em base64) num documento próprio na coleção "mp3",
+  // um por cartão do mural (id = slot0, slot1...). Assim o arquivo de
+  // áudio nunca compartilha documento com o resto do config, então uma
+  // música maior não trava o salvamento das fotos/textos.
+  async salvarMp3(itemId, dataUrlBase64){
+    await setDoc(doc(db, MP3_REF_COLECAO, itemId), { dataUrl: dataUrlBase64 });
+  },
+  async carregarMp3(itemId){
+    try{
+      const snap = await getDoc(doc(db, MP3_REF_COLECAO, itemId));
+      return snap.exists() ? (snap.data().dataUrl || "") : "";
+    }catch(err){
+      console.warn("Não foi possível carregar o mp3:", err);
+      return "";
+    }
   },
   onAuth(cb){
     onAuthStateChanged(auth, cb);
@@ -854,6 +886,30 @@ Com carinho,
 Pietro ♡`
 };
 /* ========================================================================= */
+
+/* ---------- Vídeo: detecta YouTube / Google Drive / link direto ---------- */
+function obterEmbedVideo(url){
+  if(!url) return null;
+  url = String(url).trim();
+  if(!url) return null;
+
+  // YouTube: watch?v=, youtu.be/, shorts/, embed/
+  let m = url.match(/(?:youtube\.com\/(?:watch\?v=|shorts\/|embed\/)|youtu\.be\/)([a-zA-Z0-9_-]{6,})/i);
+  if(m){
+    return { tipo:'youtube', embedUrl:`https://www.youtube.com/embed/${m[1]}` };
+  }
+
+  // Google Drive: /file/d/ID/..., open?id=ID, uc?id=ID
+  if(/drive\.google\.com/i.test(url)){
+    m = url.match(/\/file\/d\/([a-zA-Z0-9_-]+)/) || url.match(/[?&]id=([a-zA-Z0-9_-]+)/);
+    if(m){
+      return { tipo:'drive', embedUrl:`https://drive.google.com/file/d/${m[1]}/preview` };
+    }
+  }
+
+  // Fallback: link direto (ex: .mp4)
+  return { tipo:'direto', embedUrl:url };
+}
 
 /* ---------- Roteamento: site normal x aba administrativa ---------- */
 function ehRotaAdmin(){
@@ -957,6 +1013,10 @@ function iniciarSite(){
     setTimeout(()=>irParaTela(1), 350);
   });
 
+  // Referência ao objeto do Firebase, preenchida assim que ele estiver pronto
+  // (usada pra buscar o mp3 sob demanda, direto do Firestore).
+  let fbSite = null;
+
   // ---------- TELA 2 — Mural de lembranças ----------
   const mural = document.getElementById('mural');
   function renderMural(){
@@ -987,12 +1047,19 @@ function iniciarSite(){
       html += `<img class="polaroid-modal-img" src="${item.fotoUrl||''}" alt="foto">`;
     } else if(item.tipo === 'mp3'){
       html += `<div class="player">
-          <button id="playBtn">▶</button>
+          <button id="playBtn" ${item.mp3Url?'':'disabled'}>${item.mp3Url?'▶':'…'}</button>
           <div class="info"><b>${item.mp3Titulo||'Música'}</b><span>toque para ouvir</span></div>
         </div>
         <audio id="audioPlayer" src="${item.mp3Url||''}"></audio>`;
     } else if(item.tipo === 'video'){
-      html += `<video class="modal-video" src="${item.videoUrl||''}" controls playsinline></video>`;
+      const embed = obterEmbedVideo(item.videoUrl);
+      if(!embed){
+        html += `<p>Vídeo ainda não configurado.</p>`;
+      } else if(embed.tipo === 'youtube' || embed.tipo === 'drive'){
+        html += `<div class="modal-video-wrap"><iframe src="${embed.embedUrl}" allow="autoplay; encrypted-media; picture-in-picture" allowfullscreen loading="lazy"></iframe></div>`;
+      } else {
+        html += `<video class="modal-video" src="${embed.embedUrl}" controls playsinline></video>`;
+      }
     } else if(item.tipo === 'link'){
       html += `<p>${item.linkDescricao||''}</p>
         <a class="modal-link-btn" href="${item.linkUrl||'#'}" target="_blank" rel="noopener">${item.linkLabel||'Abrir link'}</a>`;
@@ -1010,10 +1077,24 @@ function iniciarSite(){
       const audio = document.getElementById('audioPlayer');
       const playBtn = document.getElementById('playBtn');
       playBtn.addEventListener('click', ()=>{
-        if(!item.mp3Url){ playBtn.textContent='♡'; return; }
+        if(!audio.src){ return; }
         if(audio.paused){ audio.play(); playBtn.textContent='❚❚'; }
         else{ audio.pause(); playBtn.textContent='▶'; }
       });
+      // Se o cartão não tem um mp3Url (formato antigo do Storage), o áudio
+      // fica guardado em base64 num documento próprio no Firestore — busca aqui.
+      if(!item.mp3Url){
+        if(fbSite && item.id){
+          fbSite.carregarMp3(item.id).then((dataUrl)=>{
+            if(!dataUrl){ playBtn.textContent='♡'; return; }
+            audio.src = dataUrl;
+            playBtn.disabled = false;
+            playBtn.textContent = '▶';
+          }).catch(()=>{ playBtn.textContent='♡'; });
+        } else {
+          playBtn.textContent = '♡';
+        }
+      }
     }
   }
   document.getElementById('modalFechar').addEventListener('click', fecharModal);
@@ -1265,6 +1346,7 @@ function iniciarSite(){
 
   // ---------- Integração com Firebase: aplica config remoto em tempo real ----------
   comFirebase((fb)=>{
+    fbSite = fb;
     fb.escutarConfig((dados)=>{
       if(dados.fotoAbertura){ CONFIG.fotoAbertura = dados.fotoAbertura; aplicarFotoAbertura(); }
       if(Array.isArray(dados.mural) && dados.mural.length){ CONFIG.mural = dados.mural; renderMural(); }
@@ -1473,7 +1555,8 @@ function iniciarAdmin(){
 
           <div class="admin-campos-tipo" data-tipo-campos="mp3">
             <div class="admin-campo"><label>Título da música</label><input type="text" data-campo="mp3Titulo" value="${item.mp3Titulo||''}"></div>
-            <div class="admin-campo"><label>Link do mp3</label><input type="url" data-campo="mp3Url" value="${item.mp3Url||''}" placeholder="https://...mp3"></div>
+            <div class="admin-campo"><label>Arquivo MP3</label><input type="file" accept="audio/*" data-campo-arquivo="mp3Url"></div>
+            <div class="admin-mp3-atual" data-mp3-atual style="${item.mp3Url?'':'display:none;'}">🎵 <span data-mp3-nome>${item.mp3Url?'arquivo já salvo':''}</span></div>
           </div>
 
           <div class="admin-campos-tipo" data-tipo-campos="link">
@@ -1483,7 +1566,11 @@ function iniciarAdmin(){
           </div>
 
           <div class="admin-campos-tipo" data-tipo-campos="video">
-            <div class="admin-campo"><label>Link do vídeo (mp4)</label><input type="url" data-campo="videoUrl" value="${item.videoUrl||''}" placeholder="https://...mp4"></div>
+            <div class="admin-campo">
+              <label>Link do vídeo (YouTube, Google Drive ou link direto)</label>
+              <input type="url" data-campo="videoUrl" value="${item.videoUrl||''}" placeholder="Cole aqui o link do YouTube ou do Google Drive">
+            </div>
+            <div class="admin-video-preview" data-video-preview style="${item.videoUrl?'':'display:none;'}"></div>
           </div>
 
           <div class="admin-campos-tipo" data-tipo-campos="versiculo">
@@ -1511,6 +1598,54 @@ function iniciarAdmin(){
         atualizarVisibilidadeTipo();
         selectTipo.addEventListener('change', atualizarVisibilidadeTipo);
 
+        const inputVideoCartao = bloco.querySelector('[data-campo="videoUrl"]');
+        const previewVideoCartao = bloco.querySelector('[data-video-preview]');
+        function atualizarPreviewVideo(){
+          const embed = obterEmbedVideo(inputVideoCartao.value);
+          if(!embed){
+            previewVideoCartao.style.display = 'none';
+            previewVideoCartao.innerHTML = '';
+            return;
+          }
+          previewVideoCartao.style.display = 'block';
+          if(embed.tipo === 'youtube' || embed.tipo === 'drive'){
+            previewVideoCartao.innerHTML = `<iframe src="${embed.embedUrl}" allow="autoplay; encrypted-media; picture-in-picture" allowfullscreen loading="lazy"></iframe>`;
+          } else {
+            previewVideoCartao.innerHTML = `<video src="${embed.embedUrl}" controls playsinline></video>`;
+          }
+        }
+        if(inputVideoCartao){
+          atualizarPreviewVideo();
+          inputVideoCartao.addEventListener('change', atualizarPreviewVideo);
+          inputVideoCartao.addEventListener('blur', atualizarPreviewVideo);
+        }
+
+        const inputMp3Cartao = bloco.querySelector('[data-campo-arquivo="mp3Url"]');
+        let mp3Base64Temp = null;
+        // Limite prático pra caber tranquilo num documento do Firestore
+        // (que tem teto de 1MB). Base64 deixa o arquivo ~33% maior.
+        const MP3_TAMANHO_MAX = 700 * 1024; // 700KB no arquivo original
+        if(inputMp3Cartao){
+          inputMp3Cartao.addEventListener('change', (e)=>{
+            const file = e.target.files[0];
+            if(!file) return;
+            const linha = bloco.querySelector('[data-mp3-atual]');
+            const nomeEl = bloco.querySelector('[data-mp3-nome]');
+            if(file.size > MP3_TAMANHO_MAX){
+              mostrarMsg('adminMsgMural', `Esse mp3 tem ${(file.size/1024/1024).toFixed(1)}MB — use um trecho de até ~700KB (o Firestore tem limite de 1MB por documento).`, 8000);
+              inputMp3Cartao.value = '';
+              return;
+            }
+            const leitor = new FileReader();
+            leitor.onload = (ev)=>{
+              mp3Base64Temp = ev.target.result;
+              if(nomeEl) nomeEl.textContent = file.name;
+              if(linha) linha.style.display = 'block';
+            };
+            leitor.readAsDataURL(file);
+          });
+        }
+
         const inputFotoCartao = bloco.querySelector('[data-campo-arquivo="fotoUrl"]');
         let fotoCartaoBase64Temp = null;
         if(inputFotoCartao){
@@ -1533,7 +1668,6 @@ function iniciarAdmin(){
           novoItem.texto = bloco.querySelector('[data-campo="texto"]').value;
           novoItem.fotoUrl = fotoCartaoBase64Temp || item.fotoUrl || '';
           novoItem.mp3Titulo = bloco.querySelector('[data-campo="mp3Titulo"]').value;
-          novoItem.mp3Url = bloco.querySelector('[data-campo="mp3Url"]').value;
           novoItem.linkDescricao = bloco.querySelector('[data-campo="linkDescricao"]').value;
           novoItem.linkLabel = bloco.querySelector('[data-campo="linkLabel"]').value;
           novoItem.linkUrl = bloco.querySelector('[data-campo="linkUrl"]').value;
@@ -1542,6 +1676,21 @@ function iniciarAdmin(){
           novoItem.versLivro = bloco.querySelector('[data-campo="versLivro"]').value;
           novoItem.versCap = bloco.querySelector('[data-campo="versCap"]').value;
           novoItem.versVers = bloco.querySelector('[data-campo="versVers"]').value;
+
+          if(mp3Base64Temp){
+            mostrarMsg('adminMsgMural', 'Salvando música, aguarde...', 20000);
+            try{
+              await fb.salvarMp3(novoItem.id, mp3Base64Temp);
+              // mp3Url fica vazio de propósito: o site busca o áudio no
+              // documento separado (coleção "mp3") pelo id do cartão.
+              novoItem.mp3Url = '';
+            }catch(err){
+              mostrarMsg('adminMsgMural','Erro ao salvar mp3: '+err.message, 5000);
+              return;
+            }
+          } else {
+            novoItem.mp3Url = item.mp3Url || '';
+          }
 
           configAtual.mural[i] = novoItem;
           try{
