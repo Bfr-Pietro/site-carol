@@ -32,6 +32,7 @@ body{
   color:var(--texto);
   background:var(--creme);
 }
+html.modo-admin,
 body.modo-admin{ overflow:auto; height:auto; min-height:100%; background:var(--bege); }
 body.modo-admin #dots, body.modo-admin #app{ display:none !important; }
 
@@ -862,6 +863,7 @@ function ehRotaAdmin(){
 }
 
 if(ehRotaAdmin()){
+  document.documentElement.classList.add('modo-admin');
   document.body.classList.add('modo-admin');
   window.addEventListener('DOMContentLoaded', iniciarAdmin);
   if(document.readyState !== 'loading') iniciarAdmin();
