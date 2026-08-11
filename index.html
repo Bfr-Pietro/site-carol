@@ -1,0 +1,1622 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>um pedacinho de mim ♡</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@400;500;600;700&family=Comfortaa:wght@400;600;700&family=Caveat:wght@500;600;700&display=swap" rel="stylesheet">
+<style>
+/* ============ CONFIG DE CORES / TOKENS ============ */
+:root{
+  --rosa-pastel:#ffd9e6;
+  --rosa-claro:#fff1f5;
+  --creme:#fdf8f4;
+  --bege:#f4e9dc;
+  --lavanda:#e9e1f6;
+  --lilas:#d9c3ec;
+  --vermelho-detalhe:#e8657f;
+  --dourado-suave:#e3b567;
+  --texto:#5b3f4d;
+  --texto-suave:#8a6f7c;
+  --sombra: 0 10px 28px -6px rgba(160,90,115,.22);
+  --sombra-suave: 0 4px 14px -4px rgba(160,90,115,.16);
+  --font-titulo:'Comfortaa', cursive;
+  --font-corpo:'Quicksand', sans-serif;
+  --font-carta:'Caveat', cursive;
+}
+*{box-sizing:border-box; -webkit-tap-highlight-color:transparent;}
+html,body{margin:0; padding:0; height:100%; overflow:hidden;}
+body{
+  font-family:var(--font-corpo);
+  color:var(--texto);
+  background:var(--creme);
+}
+body.modo-admin{ overflow:auto; height:auto; min-height:100%; background:var(--bege); }
+body.modo-admin #dots, body.modo-admin #app{ display:none !important; }
+
+#app{
+  height:100svh;
+  width:100%;
+  overflow-y:scroll;
+  overflow-x:hidden;
+  scroll-snap-type:y mandatory;
+  scroll-behavior:smooth;
+}
+.screen{
+  height:100svh;
+  width:100%;
+  position:relative;
+  scroll-snap-align:start;
+  scroll-snap-stop:always;
+  overflow:hidden;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  padding: 28px 20px;
+  text-align:center;
+}
+
+/* ============ DOTS DE NAVEGAÇÃO ============ */
+#dots{
+  position:fixed;
+  right:12px;
+  top:50%;
+  transform:translateY(-50%);
+  display:flex;
+  flex-direction:column;
+  gap:9px;
+  z-index:500;
+}
+#dots span{
+  width:6px; height:6px; border-radius:50%;
+  background:rgba(107,74,92,.22);
+  transition:.35s cubic-bezier(.34,1.56,.64,1);
+  cursor:pointer;
+}
+#dots span.active{ background:var(--vermelho-detalhe); height:18px; border-radius:6px; }
+
+/* ============ UTILITÁRIOS DECORATIVOS ============ */
+.particle{ position:absolute; pointer-events:none; user-select:none; opacity:0; }
+@keyframes floatUp{
+  0%{ transform:translateY(0) rotate(0deg) scale(.8); opacity:0; }
+  10%{ opacity:.55; }
+  90%{ opacity:.3; }
+  100%{ transform:translateY(-120vh) rotate(25deg) scale(1.1); opacity:0; }
+}
+@keyframes floatUpBurst{
+  0%{ transform:translateY(0) rotate(0deg) scale(.8); opacity:0; }
+  10%{ opacity:.95; }
+  90%{ opacity:.6; }
+  100%{ transform:translateY(-120vh) rotate(25deg) scale(1.1); opacity:0; }
+}
+@keyframes gentleFloat{
+  0%,100%{ transform:translateY(0) rotate(var(--rot,0deg)); }
+  50%{ transform:translateY(-10px) rotate(calc(var(--rot,0deg) + 1.5deg)); }
+}
+@keyframes pulse{
+  0%,100%{ transform:scale(1); }
+  50%{ transform:scale(1.04); }
+}
+@keyframes twinkle{
+  0%,100%{ opacity:.25; transform:scale(.8);}
+  50%{ opacity:1; transform:scale(1.15);}
+}
+@keyframes shootingStar{
+  0%{ transform:translate(0,0); opacity:1; }
+  70%{ opacity:1; }
+  100%{ transform:translate(-260px,180px); opacity:0; }
+}
+.fade-in{ animation:fadeIn 1s ease forwards; opacity:0; }
+@keyframes fadeIn{ to{ opacity:1; } }
+.rise-in{ animation:riseIn .9s cubic-bezier(.22,1,.36,1) forwards; opacity:0; transform:translateY(18px); }
+@keyframes riseIn{ to{ opacity:1; transform:translateY(0); } }
+
+/* ============ TELA 1 — ABERTURA ============ */
+#tela1{
+  background:#000;
+  color:#fff;
+}
+.tela1-bg{
+  position:absolute; inset:0;
+  background-size:cover; background-position:center;
+  filter:saturate(1.05);
+  transition:background-image .4s ease;
+}
+.tela1-overlay{
+  position:absolute; inset:0;
+  background:linear-gradient(190deg, rgba(60,20,40,.28) 0%, rgba(55,18,38,.48) 55%, rgba(35,12,28,.82) 100%);
+}
+.tela1-content{ position:relative; z-index:2; max-width:400px; }
+.tela1-content h1{
+  font-family:var(--font-titulo);
+  font-weight:600;
+  font-size:clamp(23px,6.2vw,29px);
+  line-height:1.4;
+  letter-spacing:.01em;
+  margin:0 0 16px;
+  text-shadow:0 2px 16px rgba(0,0,0,.4);
+}
+.tela1-content p{
+  font-size:15px;
+  line-height:1.65;
+  opacity:.92;
+  max-width:320px;
+  margin:0 auto 36px;
+  text-shadow:0 2px 10px rgba(0,0,0,.35);
+}
+.btn-fofo{
+  font-family:var(--font-corpo);
+  font-weight:700;
+  font-size:14.5px;
+  letter-spacing:.02em;
+  color:var(--texto);
+  background:var(--rosa-pastel);
+  border:none;
+  padding:15px 38px;
+  border-radius:40px;
+  box-shadow:var(--sombra);
+  cursor:pointer;
+  animation:pulse 3.2s ease-in-out infinite;
+  position:relative;
+  z-index:3;
+  transition:transform .25s, box-shadow .25s;
+}
+.btn-fofo:active{ transform:scale(.94); }
+
+/* ============ TELA 2 — PAINEL DE LEMBRANÇAS ============ */
+#tela2{
+  background:
+    radial-gradient(circle at 15% 20%, rgba(255,255,255,.6), transparent 40%),
+    repeating-linear-gradient(0deg, var(--creme) 0px, var(--creme) 27px, #f3e6d8 28px),
+    var(--bege);
+  justify-content:flex-start;
+  padding-top:44px;
+  overflow-y:auto;
+}
+.tela2-titulo{
+  font-family:var(--font-titulo);
+  font-weight:600;
+  font-size:21px;
+  letter-spacing:.01em;
+  color:var(--vermelho-detalhe);
+  position:relative;
+  display:inline-block;
+  margin-bottom:26px;
+}
+.tela2-titulo::before{
+  content:"";
+  position:absolute; top:-13px; left:50%; transform:translateX(-50%) rotate(-3deg);
+  width:56px; height:16px;
+  background:rgba(255,217,230,.7);
+  border-radius:2px;
+}
+.mural{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:20px 14px;
+  max-width:400px;
+  width:100%;
+  padding-bottom:26px;
+}
+.cartao{
+  background:#fff;
+  border-radius:18px;
+  padding:20px 10px 16px;
+  box-shadow:var(--sombra-suave);
+  position:relative;
+  cursor:pointer;
+  transform:rotate(var(--rot));
+  animation:gentleFloat 6s ease-in-out infinite;
+  animation-delay:var(--delay,0s);
+  transition:transform .35s cubic-bezier(.34,1.56,.64,1), box-shadow .35s;
+}
+.cartao:active{ transform:scale(.94) rotate(var(--rot)); box-shadow:var(--sombra); }
+.cartao .tachinha{
+  position:absolute; top:-8px; left:50%; transform:translateX(-50%);
+  width:14px; height:14px; border-radius:50%;
+  box-shadow:0 3px 4px rgba(0,0,0,.25);
+}
+.cartao .icone{ font-size:36px; display:block; margin-bottom:8px; }
+.cartao .rotulo{ font-weight:600; font-size:13.5px; color:var(--texto); }
+.tela2-rodape{
+  font-size:12.5px;
+  color:var(--texto-suave);
+  font-style:italic;
+  margin-top:4px;
+  padding-bottom:20px;
+}
+
+/* Modal (usado nas telas 2 e 3) */
+.modal-overlay{
+  position:fixed; inset:0; z-index:900;
+  background:rgba(80,50,60,.35);
+  backdrop-filter:blur(6px);
+  display:flex; align-items:center; justify-content:center;
+  opacity:0; pointer-events:none;
+  transition:opacity .4s ease;
+  padding:24px;
+}
+.modal-overlay.aberto{ opacity:1; pointer-events:auto; }
+.modal-caixa{
+  background:#fff;
+  border-radius:22px;
+  max-width:340px; width:100%;
+  max-height:82vh;
+  overflow-y:auto;
+  padding:28px 24px;
+  box-shadow:0 20px 50px rgba(120,70,95,.3);
+  transform:scale(.85) translateY(20px);
+  transition:transform .4s cubic-bezier(.34,1.56,.64,1);
+  position:relative;
+  text-align:center;
+}
+.modal-overlay.aberto .modal-caixa{ transform:scale(1) translateY(0); }
+.modal-fechar{
+  position:absolute; top:12px; right:14px;
+  background:none; border:none; font-size:20px; color:var(--texto-suave); cursor:pointer;
+}
+.modal-caixa h3{ font-family:var(--font-titulo); color:var(--vermelho-detalhe); margin:4px 0 12px; font-size:18px;}
+.modal-caixa p{ line-height:1.65; font-size:14.5px; margin:0; }
+.modal-icone-grande{ font-size:48px; }
+.polaroid-modal-img{
+  width:100%; border:8px solid #fff; box-shadow:0 6px 18px rgba(0,0,0,.18); border-radius:2px; margin-top:6px;
+}
+.modal-video{ width:100%; border-radius:10px; margin-top:6px; box-shadow:0 6px 18px rgba(0,0,0,.18); background:#000; }
+.modal-link-btn{
+  display:inline-block; margin-top:10px; text-decoration:none;
+  background:var(--vermelho-detalhe); color:#fff; font-weight:700; font-size:14px;
+  padding:11px 24px; border-radius:30px; box-shadow:var(--sombra);
+}
+.modal-versiculo-ref{ margin-top:10px; font-size:13px; color:var(--texto-suave); font-style:italic; }
+.player{
+  display:flex; align-items:center; gap:12px;
+  background:var(--rosa-claro); border-radius:14px; padding:12px 14px; margin-top:6px;
+}
+.player button{
+  width:40px; height:40px; border-radius:50%; border:none; background:var(--vermelho-detalhe); color:#fff; font-size:16px; cursor:pointer; flex:none;
+}
+.player .info{ text-align:left; font-size:13px; overflow:hidden; }
+.player .info b{ display:block; font-size:13.5px; }
+
+/* ============ TELA 3 — ÁLBUM DE POLAROIDS ============ */
+#tela3{
+  background:linear-gradient(160deg, var(--rosa-claro), var(--rosa-pastel) 60%, var(--lavanda));
+  overflow-y:auto;
+  padding-top:40px;
+  align-items:center;
+  justify-content:flex-start;
+}
+.tela3-titulo{
+  font-family:var(--font-titulo);
+  font-weight:600;
+  font-size:20px;
+  letter-spacing:.01em;
+  color:var(--vermelho-detalhe);
+  margin-bottom:24px;
+  position:relative;
+  z-index:2;
+}
+#decor-tela3{ position:fixed; inset:0; pointer-events:none; z-index:1; }
+.polaroids-grid{
+  position:relative; z-index:2;
+  display:flex; flex-wrap:wrap; gap:26px 16px;
+  justify-content:center; align-content:flex-start;
+  max-width:440px; width:100%;
+  padding-bottom:34px;
+}
+.polaroid{
+  background:#fff;
+  padding:10px 10px 10px;
+  border-radius:4px;
+  box-shadow:0 8px 18px -4px rgba(150,90,110,.22);
+  animation:gentleFloat 7s ease-in-out infinite;
+  animation-delay:var(--delay,0s);
+  cursor:pointer;
+  transition:all .55s cubic-bezier(.22,1,.36,1);
+  z-index:5;
+  width:132px;
+}
+.polaroid .moldura{ width:100%; height:132px; border-radius:2px; overflow:hidden; background:#eee; position:relative; }
+.polaroid img{ display:block; width:100%; height:100%; object-fit:cover; }
+.polaroid .fita{
+  position:absolute; top:-10px; left:50%; transform:translateX(-50%) rotate(-3deg);
+  width:38px; height:16px; background:rgba(255,255,255,.6); border:1px solid rgba(0,0,0,.03);
+  box-shadow:0 2px 4px rgba(0,0,0,.08);
+}
+.polaroid .legenda{
+  font-family:var(--font-carta);
+  font-size:15px; line-height:1.25;
+  color:var(--texto);
+  margin-top:8px; padding:0 2px 4px;
+  min-height:20px;
+  word-break:break-word;
+}
+.polaroid.focado{
+  position:fixed !important;
+  top:50% !important; left:50% !important;
+  transform:translate(-50%,-50%) rotate(0deg) !important;
+  width:min(80vw,300px) !important;
+  max-height:88vh;
+  overflow:auto;
+  z-index:950;
+  animation:none;
+  padding:14px 14px 14px;
+  margin:0;
+}
+.polaroid.focado .moldura{ height:min(80vw,300px); }
+.polaroid.focado .legenda{ font-size:18px; margin-top:10px; }
+#album-blur{
+  position:fixed; inset:0; background:rgba(80,50,60,.3); backdrop-filter:blur(8px);
+  z-index:940; opacity:0; pointer-events:none; transition:opacity .5s;
+}
+#album-blur.aberto{ opacity:1; pointer-events:auto; }
+#voltar-polaroid{
+  position:fixed; bottom:6%; left:50%; transform:translateX(-50%);
+  z-index:960; background:rgba(255,255,255,.92); border:none; padding:10px 22px;
+  border-radius:30px; font-family:var(--font-corpo); font-weight:600; color:var(--texto);
+  box-shadow:var(--sombra); opacity:0; pointer-events:none; transition:opacity .4s; cursor:pointer;
+}
+#voltar-polaroid.aberto{ opacity:1; pointer-events:auto; }
+.nuvem{ position:absolute; opacity:.8; filter:blur(.3px); }
+
+/* ============ TELA 4 — CÉU ESTRELADO ============ */
+#tela4{
+  background:radial-gradient(ellipse at 50% 0%, #2b2350 0%, #1a1438 45%, #0d0b24 100%);
+  color:#f6eefc;
+}
+.estrela{ position:absolute; border-radius:50%; background:#fff; animation:twinkle 2.4s ease-in-out infinite; }
+.estrela-cadente{
+  position:absolute; width:2px; height:2px; background:#fff; border-radius:50%;
+  box-shadow:0 0 6px 2px rgba(255,255,255,.8);
+  animation:shootingStar 1.6s linear forwards;
+}
+.estrela-cadente::before{
+  content:""; position:absolute; top:0; right:0; width:70px; height:1px;
+  background:linear-gradient(90deg, rgba(255,255,255,.9), transparent);
+  transform:translateY(1px) rotate(180deg); transform-origin:right;
+}
+.planeta{
+  position:absolute; width:16px; height:16px; border-radius:50%;
+  cursor:pointer; z-index:10;
+}
+.planeta.venus{ background:radial-gradient(circle at 35% 30%, #fff6dc, #ffd77a); box-shadow:0 0 14px 4px rgba(255,214,120,.55);}
+.planeta.jupiter{ background:radial-gradient(circle at 35% 30%, #ffe9e0, #f0a875); box-shadow:0 0 14px 4px rgba(240,170,120,.5);}
+.planeta.brilhar{ animation:planetaBrilho .9s ease; }
+@keyframes planetaBrilho{
+  0%{ box-shadow:0 0 14px 4px rgba(255,255,255,.5);}
+  50%{ box-shadow:0 0 34px 14px rgba(255,255,255,.9); transform:scale(1.5);}
+  100%{ box-shadow:0 0 14px 4px rgba(255,255,255,.5); transform:scale(1);}
+}
+.planeta-label{
+  position:absolute; font-size:10.5px; color:#e9dcff; opacity:.75; white-space:nowrap;
+  font-family:var(--font-corpo);
+}
+.tela4-titulo{
+  position:relative; z-index:5; font-family:var(--font-titulo); font-size:19px; line-height:1.6;
+  max-width:300px; margin-top:-30px; text-shadow:0 2px 12px rgba(0,0,0,.4);
+}
+.horizonte{
+  position:absolute; bottom:0; left:0; width:100%; height:14%;
+  background:#0a0818;
+  clip-path:polygon(0% 100%,0% 40%,4% 55%,9% 20%,14% 60%,20% 35%,27% 70%,34% 30%,40% 65%,48% 15%,55% 60%,63% 35%,70% 68%,78% 25%,85% 58%,92% 40%,100% 65%,100% 100%);
+}
+
+/* ============ TELA 5 — CONTAGEM ============ */
+#tela5{
+  background:linear-gradient(165deg, var(--lavanda) 0%, var(--rosa-claro) 55%, var(--bege) 100%);
+}
+.tela5-titulo{ font-family:var(--font-titulo); font-weight:600; font-size:20px; letter-spacing:.01em; color:var(--vermelho-detalhe); margin-bottom:4px; }
+.tela5-sub{ font-size:14px; color:var(--texto-suave); margin-bottom:26px; }
+.contador{
+  display:flex; gap:10px; z-index:5; position:relative;
+}
+.contador .bloco{
+  background:#fff; border-radius:16px; padding:14px 10px; min-width:64px;
+  box-shadow:var(--sombra-suave);
+}
+.contador .num{ font-family:var(--font-titulo); font-size:26px; color:var(--vermelho-detalhe); display:block; }
+.contador .lbl{ font-size:10.5px; color:var(--texto-suave); text-transform:uppercase; letter-spacing:.05em; }
+.tela5-chegou{
+  font-family:var(--font-titulo); font-size:24px; color:var(--vermelho-detalhe);
+  display:none;
+}
+
+/* ============ TELA 6 — CARTA FINAL ============ */
+#tela6{
+  background:linear-gradient(170deg, var(--bege), var(--rosa-claro));
+}
+.tela6-titulo{ font-family:var(--font-titulo); font-weight:600; font-size:19px; letter-spacing:.01em; color:var(--vermelho-detalhe); margin-bottom:26px; }
+.envelope-wrap{ position:relative; width:min(78vw,260px); height:min(56vw,190px); margin:0 auto; }
+.envelope-corpo{
+  position:absolute; inset:0; background:#fbe3ea; border-radius:8px; box-shadow:var(--sombra); overflow:visible;
+}
+.envelope-tampa{
+  position:absolute; top:0; left:0; width:100%; height:60%;
+  background:#ffd0e0; clip-path:polygon(0 0,100% 0,50% 100%);
+  transform-origin:top; transition:transform 1s cubic-bezier(.6,-0.2,.4,1.3);
+  border-radius:8px 8px 0 0;
+  z-index:3;
+}
+.envelope-tampa.aberta{ transform:rotateX(180deg); }
+.envelope-coracao{ position:absolute; top:34%; left:50%; transform:translate(-50%,-50%); font-size:20px; z-index:2; transition:opacity .3s; }
+.envelope-coracao.escondido{ opacity:0; }
+.carta-papel-peek{
+  position:absolute; left:6%; bottom:6px; width:88%; height:0%;
+  background:#fffdf7; border-radius:6px 6px 0 0; box-shadow:0 6px 16px rgba(150,100,110,.2);
+  overflow:hidden; transition:height .7s cubic-bezier(.22,1,.36,1), bottom .7s cubic-bezier(.22,1,.36,1);
+  z-index:1;
+}
+.carta-papel-peek.subiu{ height:38px; bottom:92%; }
+.tela6-botao-wrap{ margin-top:28px; }
+.btn-abrir-carta{ position:relative; z-index:4; }
+.coracao-final{ display:inline-block; animation:pulse 1.4s ease-in-out infinite; font-size:20px; }
+
+/* Carta em tela cheia */
+#cartaFullscreen{
+  position:fixed; inset:0; z-index:980;
+  background:
+    repeating-linear-gradient(0deg, #fffdf7 0px, #fffdf7 30px, #fbf2e4 31px),
+    #fffdf7;
+  transform:translateY(102%);
+  transition:transform .85s cubic-bezier(.22,1,.36,1);
+  overflow-y:auto;
+  -webkit-overflow-scrolling:touch;
+}
+#cartaFullscreen.aberta{ transform:translateY(0); }
+.carta-fullscreen-inner{
+  max-width:540px; margin:0 auto;
+  min-height:100%;
+  padding:64px 26px 60px;
+  text-align:left;
+  display:flex; flex-direction:column;
+}
+.carta-fullscreen-topo{ text-align:center; font-size:26px; margin-bottom:18px; opacity:.8; }
+.carta-texto-cheia{
+  font-family:var(--font-carta);
+  font-size:22px; line-height:1.6; color:#5c4351;
+  flex:1;
+}
+.carta-texto-cheia p{ margin:0 0 16px; }
+.btn-fechar-carta{
+  font-family:var(--font-corpo); font-weight:700; font-size:14.5px;
+  color:var(--texto); background:#fff; border:2px solid var(--rosa-pastel);
+  padding:13px 32px; border-radius:40px; box-shadow:var(--sombra); cursor:pointer;
+  margin:30px auto 6px; display:block; transition:transform .25s;
+}
+.btn-fechar-carta:active{ transform:scale(.94); }
+
+/* ============ ABA ADMINISTRATIVA ============ */
+#adminPanel{
+  display:none;
+  min-height:100vh;
+  width:100%;
+  background:var(--bege);
+  font-family:var(--font-corpo);
+  color:var(--texto);
+  padding:26px 16px 60px;
+}
+body.modo-admin #adminPanel{ display:block; }
+.admin-caixa{
+  max-width:520px; margin:0 auto;
+  background:#fff; border-radius:20px; box-shadow:var(--sombra);
+  padding:30px 24px;
+}
+.admin-titulo{
+  font-family:var(--font-titulo); color:var(--vermelho-detalhe);
+  font-size:22px; margin:0 0 6px; text-align:center;
+}
+.admin-sub{ text-align:center; font-size:13px; color:var(--texto-suave); margin:0 0 24px; }
+.admin-campo{ margin-bottom:14px; text-align:left; }
+.admin-campo label{ display:block; font-size:12.5px; font-weight:700; margin-bottom:5px; color:var(--texto); }
+.admin-campo input[type=text],
+.admin-campo input[type=email],
+.admin-campo input[type=password],
+.admin-campo input[type=url],
+.admin-campo input[type=datetime-local],
+.admin-campo select,
+.admin-campo textarea{
+  width:100%; padding:10px 12px; border-radius:10px; border:1.5px solid #eddce3;
+  font-family:var(--font-corpo); font-size:14px; color:var(--texto); background:#fffaf9;
+}
+.admin-campo textarea{ min-height:110px; resize:vertical; font-family:var(--font-carta); font-size:17px; }
+.admin-btn{
+  font-family:var(--font-corpo); font-weight:700; font-size:14px; color:#fff;
+  background:var(--vermelho-detalhe); border:none; padding:11px 22px; border-radius:30px;
+  cursor:pointer; box-shadow:var(--sombra); transition:transform .2s;
+}
+.admin-btn:active{ transform:scale(.95); }
+.admin-btn.secundario{ background:#fff; color:var(--texto); border:2px solid var(--rosa-pastel); }
+.admin-btn.perigo{ background:#e05a72; }
+.admin-erro{ color:#c0395a; font-size:13px; text-align:center; margin-top:6px; min-height:16px; }
+.admin-msg-ok{ color:#3a9d6a; font-size:13px; text-align:center; margin-top:6px; min-height:16px; }
+.admin-secao{ margin-bottom:30px; padding-bottom:24px; border-bottom:1px dashed #eddce3; }
+.admin-secao:last-child{ border-bottom:none; }
+.admin-secao h2{ font-family:var(--font-titulo); font-size:16.5px; color:var(--texto); margin:0 0 4px; }
+.admin-secao .admin-desc{ font-size:12px; color:var(--texto-suave); margin:0 0 14px; }
+.admin-topo{ display:flex; justify-content:space-between; align-items:center; max-width:520px; margin:0 auto 18px; }
+.admin-topo h1{ font-family:var(--font-titulo); color:var(--vermelho-detalhe); font-size:19px; margin:0; }
+.admin-preview-img{ max-width:100%; max-height:160px; border-radius:10px; display:block; margin-top:8px; box-shadow:0 4px 14px rgba(0,0,0,.15); }
+.admin-cartao-mural{ border:1.5px solid #f3e2e9; border-radius:14px; padding:14px; margin-bottom:14px; background:#fffaf9; }
+.admin-cartao-mural h3{ font-size:14px; margin:0 0 10px; color:var(--vermelho-detalhe); }
+.admin-campos-tipo{ display:none; }
+.admin-campos-tipo.ativo{ display:block; }
+.admin-polaroid-item{
+  display:flex; gap:10px; align-items:flex-start; background:#fffaf9;
+  border:1.5px solid #f3e2e9; border-radius:14px; padding:10px; margin-bottom:10px;
+}
+.admin-polaroid-item img{ width:64px; height:64px; object-fit:cover; border-radius:8px; flex:none; background:#eee; }
+.admin-polaroid-item .campos{ flex:1; }
+.admin-polaroid-item input{ width:100%; padding:7px 9px; border-radius:8px; border:1.5px solid #eddce3; font-size:13px; margin-bottom:6px; font-family:var(--font-corpo); }
+.admin-remover{ background:none; border:none; color:#c0395a; font-size:18px; cursor:pointer; flex:none; }
+.admin-carregando{ text-align:center; padding:40px 0; color:var(--texto-suave); }
+</style>
+</head>
+<body>
+
+<div id="dots">
+  <span data-idx="0" class="active"></span>
+  <span data-idx="1"></span>
+  <span data-idx="2"></span>
+  <span data-idx="3"></span>
+  <span data-idx="4"></span>
+  <span data-idx="5"></span>
+</div>
+
+<div id="app">
+
+  <!-- TELA 1 — ABERTURA -->
+  <section class="screen" id="tela1">
+    <div class="tela1-bg" id="fotoAbertura"></div>
+    <div class="tela1-overlay"></div>
+    <div id="particulas-tela1"></div>
+    <div class="tela1-content">
+      <h1>Mesmo de longe,<br>ainda tem um pedacinho meu aí.</h1>
+      <p>Fiz isso para você guardar alguns momentos, matar um pouquinho da saudade e, quem sabe, sorrir quando lembrar de nós. ♡</p>
+      <button class="btn-fofo" id="btnComecar">Começar</button>
+    </div>
+  </section>
+
+  <!-- TELA 2 — PAINEL DE LEMBRANÇAS -->
+  <section class="screen" id="tela2">
+    <div class="tela2-titulo">Para você ♡</div>
+    <div class="mural" id="mural"></div>
+    <div class="tela2-rodape">Toque em uma lembrança para descobrir o que ela guarda.</div>
+  </section>
+
+  <!-- TELA 3 — ÁLBUM DE POLAROIDS -->
+  <section class="screen" id="tela3">
+    <div id="decor-tela3"></div>
+    <div class="tela3-titulo">Nossos momentos ♡</div>
+    <div class="polaroids-grid" id="polaroids-container"></div>
+  </section>
+
+  <!-- TELA 4 — CÉU ESTRELADO -->
+  <section class="screen" id="tela4">
+    <div id="estrelas-container"></div>
+    <div class="horizonte"></div>
+    <p class="tela4-titulo">Entre tantas estrelas,<br>algumas simplesmente não passam despercebidas.</p>
+  </section>
+
+  <!-- TELA 5 — CONTAGEM -->
+  <section class="screen" id="tela5">
+    <div id="decor-tela5"></div>
+    <div class="tela5-titulo">Até a gente se ver de novo ♡</div>
+    <div class="tela5-sub">Só mais um pouquinho...</div>
+    <div class="contador" id="contador">
+      <div class="bloco"><span class="num" id="c-dias">000</span><span class="lbl">dias</span></div>
+      <div class="bloco"><span class="num" id="c-horas">00</span><span class="lbl">horas</span></div>
+      <div class="bloco"><span class="num" id="c-min">00</span><span class="lbl">min</span></div>
+      <div class="bloco"><span class="num" id="c-seg">00</span><span class="lbl">seg</span></div>
+    </div>
+    <div class="tela5-chegou" id="chegouMsg">Chegou o dia. ❤️</div>
+  </section>
+
+  <!-- TELA 6 — CARTA FINAL -->
+  <section class="screen" id="tela6">
+    <div class="tela6-titulo">Uma cartinha pra você</div>
+    <div class="envelope-wrap" id="envelopeWrap">
+      <div class="envelope-corpo"></div>
+      <div class="carta-papel-peek" id="cartaPapelPeek"></div>
+      <div class="envelope-tampa" id="envelopeTampa"></div>
+      <div class="envelope-coracao" id="envelopeCoracao">♡</div>
+    </div>
+    <div class="tela6-botao-wrap">
+      <button class="btn-fofo btn-abrir-carta" id="btnAbrirCarta">Abrir a carta <span class="coracao-final">💌</span></button>
+    </div>
+  </section>
+
+</div>
+
+<!-- Carta em tela cheia (tela 6) -->
+<div id="cartaFullscreen">
+  <div class="carta-fullscreen-inner">
+    <div class="carta-fullscreen-topo">♡</div>
+    <div class="carta-texto-cheia" id="cartaTextoCheia"></div>
+    <button class="btn-fechar-carta" id="btnFecharCarta">Fechar a carta ✕</button>
+  </div>
+</div>
+
+<!-- MODAL genérico (tela 2) -->
+<div class="modal-overlay" id="modalOverlay">
+  <div class="modal-caixa" id="modalCaixa">
+    <button class="modal-fechar" id="modalFechar">✕</button>
+    <div id="modalConteudo"></div>
+  </div>
+</div>
+
+<!-- Camadas do álbum de polaroids (tela 3) -->
+<div id="album-blur"></div>
+<button id="voltar-polaroid">← Voltar</button>
+
+<!-- ============ ABA ADMINISTRATIVA (/aba-administrativa) ============ -->
+<div id="adminPanel">
+  <div class="admin-topo">
+    <h1>painel do site ♡</h1>
+    <button class="admin-btn secundario" id="btnAdminLogout" style="display:none;">Sair</button>
+  </div>
+
+  <!-- Login -->
+  <div class="admin-caixa" id="adminLoginCaixa">
+    <p class="admin-titulo">Entrar</p>
+    <p class="admin-sub">Faça login para editar o site.</p>
+    <form id="adminLoginForm">
+      <div class="admin-campo">
+        <label>E-mail</label>
+        <input type="email" id="adminEmail" required autocomplete="username">
+      </div>
+      <div class="admin-campo">
+        <label>Senha</label>
+        <input type="password" id="adminSenha" required autocomplete="current-password">
+      </div>
+      <button type="submit" class="admin-btn" style="width:100%;">Entrar</button>
+      <p class="admin-erro" id="adminLoginErro"></p>
+    </form>
+  </div>
+
+  <!-- Carregando -->
+  <div class="admin-caixa admin-carregando" id="adminCarregando" style="display:none;">Carregando painel...</div>
+
+  <!-- Dashboard -->
+  <div class="admin-caixa" id="adminDashboard" style="display:none;">
+
+    <div class="admin-secao">
+      <h2>Foto da tela de abertura</h2>
+      <p class="admin-desc">Essa é a foto de fundo da primeira tela do site.</p>
+      <div class="admin-campo">
+        <input type="file" id="adminFotoAberturaInput" accept="image/*">
+      </div>
+      <img class="admin-preview-img" id="adminFotoAberturaPreview" style="display:none;">
+      <div style="margin-top:10px;">
+        <button class="admin-btn" id="adminSalvarFotoAbertura">Salvar foto de abertura</button>
+      </div>
+      <p class="admin-msg-ok" id="adminMsgFotoAbertura"></p>
+    </div>
+
+    <div class="admin-secao">
+      <h2>Cartões do painel de lembranças</h2>
+      <p class="admin-desc">Escolha o tipo de conteúdo de cada um dos 6 cartões da segunda tela.</p>
+      <div id="adminMuralLista"></div>
+      <p class="admin-msg-ok" id="adminMsgMural"></p>
+    </div>
+
+    <div class="admin-secao">
+      <h2>Polaroids (álbum de fotos)</h2>
+      <p class="admin-desc">Adicione, edite a legenda ou remova as fotos do álbum.</p>
+      <div id="adminPolaroidsLista"></div>
+      <div class="admin-cartao-mural">
+        <h3>Adicionar nova polaroid</h3>
+        <input type="file" id="adminNovaPolaroidArquivo" accept="image/*">
+        <input type="text" id="adminNovaPolaroidLegenda" placeholder="Legenda (opcional)" style="width:100%;margin-top:8px;padding:9px 11px;border-radius:8px;border:1.5px solid #eddce3;font-family:var(--font-corpo);font-size:13.5px;">
+        <div style="margin-top:10px;">
+          <button class="admin-btn" id="adminAdicionarPolaroid">Adicionar polaroid</button>
+        </div>
+      </div>
+      <p class="admin-msg-ok" id="adminMsgPolaroids"></p>
+    </div>
+
+    <div class="admin-secao">
+      <h2>Data do reencontro</h2>
+      <p class="admin-desc">Data usada na contagem regressiva da quinta tela.</p>
+      <div class="admin-campo">
+        <input type="datetime-local" id="adminDataReencontro">
+      </div>
+      <button class="admin-btn" id="adminSalvarData">Salvar data</button>
+      <p class="admin-msg-ok" id="adminMsgData"></p>
+    </div>
+
+    <div class="admin-secao">
+      <h2>Texto da carta</h2>
+      <p class="admin-desc">Separe os parágrafos com uma linha em branco.</p>
+      <div class="admin-campo">
+        <textarea id="adminCartaTexto"></textarea>
+      </div>
+      <button class="admin-btn" id="adminSalvarCarta">Salvar carta</button>
+      <p class="admin-msg-ok" id="adminMsgCarta"></p>
+    </div>
+
+  </div>
+</div>
+
+<!-- ============ FIREBASE ============ -->
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-app.js";
+import {
+  getFirestore, doc, getDoc, setDoc, onSnapshot
+} from "https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js";
+import {
+  getAuth, signInWithEmailAndPassword, onAuthStateChanged, signOut
+} from "https://www.gstatic.com/firebasejs/10.12.5/firebase-auth.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyD2SBA5QH6PodCex65QFx_EyvvnlkMR0-Q",
+  authDomain: "site-carol-540a7.firebaseapp.com",
+  projectId: "site-carol-540a7",
+  storageBucket: "site-carol-540a7.firebasestorage.app",
+  messagingSenderId: "820786141089",
+  appId: "1:820786141089:web:e537852b5c5f9bc8e75de0"
+};
+
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+const auth = getAuth(app);
+const CONFIG_REF = doc(db, "config", "site");
+
+window.PedacinhoFirebase = {
+  async carregarConfigUmaVez(){
+    try{
+      const snap = await getDoc(CONFIG_REF);
+      return snap.exists() ? snap.data() : null;
+    }catch(err){
+      console.warn("Não foi possível carregar o config do Firestore:", err);
+      return null;
+    }
+  },
+  escutarConfig(callback){
+    return onSnapshot(CONFIG_REF, (snap)=>{
+      if(snap.exists()) callback(snap.data());
+    }, (err)=>{
+      console.warn("Erro ao escutar config:", err);
+    });
+  },
+  async salvarConfig(dados){
+    await setDoc(CONFIG_REF, dados, { merge:true });
+  },
+  async login(email, senha){
+    return signInWithEmailAndPassword(auth, email, senha);
+  },
+  async logout(){
+    return signOut(auth);
+  },
+  onAuth(cb){
+    onAuthStateChanged(auth, cb);
+  }
+};
+
+window.dispatchEvent(new Event('firebase-pronto'));
+</script>
+
+<script>
+/* =========================================================================
+   CONFIGURAÇÃO PADRÃO (usada enquanto o Firestore carrega, ou como fallback)
+   Todo esse conteúdo pode ser editado pela aba administrativa em tempo real.
+   ========================================================================= */
+const CONFIG = {
+  fotoAbertura: "https://images.unsplash.com/photo-1518199266791-5375a83190b7?q=80&w=1200&auto=format&fit=crop",
+
+  mural: [
+    { id:'slot0', icone:'🌻', rotulo:'Girassol', tachinha:'#ffb703', titulo:'Um pouquinho de sol',
+      tipo:'texto', texto:"Assim como o girassol se vira pra luz, eu me viro pra pensar em você. ☀️" },
+    { id:'slot1', icone:'📖', rotulo:'Versículo', tachinha:'#8ecae6', titulo:'Um versículo pra você',
+      tipo:'versiculo', versTexto:"O amor é paciente, o amor é bondoso...", versLivro:"1 Coríntios", versCap:"13", versVers:"4" },
+    { id:'slot2', icone:'📷', rotulo:'Foto', tachinha:'#ff7fa3', titulo:'Um clique nosso',
+      tipo:'foto', fotoUrl:"https://images.unsplash.com/photo-1516589178581-6cd7833ae3b2?q=80&w=800&auto=format&fit=crop" },
+    { id:'slot3', icone:'🎧', rotulo:'Música', tachinha:'#b892e8', titulo:'Nossa música',
+      tipo:'mp3', mp3Titulo:"Nossa música", mp3Url:"" },
+    { id:'slot4', icone:'⌚', rotulo:'Tempo', tachinha:'#ffd166', titulo:'Sobre o tempo',
+      tipo:'texto', texto:"Não importa quanto tempo passe, o que vivemos continua guardado aqui dentro. ⏳" },
+    { id:'slot5', icone:'💌', rotulo:'Mensagem', tachinha:'#ff5d8f', titulo:'Uma mensagem',
+      tipo:'texto', texto:"Só passando pra lembrar que você é um dos meus lugares favoritos. ♡" }
+  ],
+
+  polaroids: [
+    { img:"https://images.unsplash.com/photo-1522673607200-164d1b6ce486?q=80&w=600&auto=format&fit=crop", legenda:"esse dia foi lindo ♡" },
+    { img:"https://images.unsplash.com/photo-1529333166437-7750a6dd5a70?q=80&w=600&auto=format&fit=crop", legenda:"risadas à toa" },
+    { img:"https://images.unsplash.com/photo-1516589178581-6cd7833ae3b2?q=80&w=600&auto=format&fit=crop", legenda:"olha esse sorriso" },
+    { img:"https://images.unsplash.com/photo-1525258977996-a0edf1451ade?q=80&w=600&auto=format&fit=crop", legenda:"tardezinha boa" },
+    { img:"https://images.unsplash.com/photo-1470116945706-e6bf5d5a53ca?q=80&w=600&auto=format&fit=crop", legenda:"momento favorito" },
+    { img:"https://images.unsplash.com/photo-1495312040802-a929cd14a6ab?q=80&w=600&auto=format&fit=crop", legenda:"saudade boa" },
+    { img:"https://images.unsplash.com/photo-1521543387133-6f3d385e6c9d?q=80&w=600&auto=format&fit=crop", legenda:"a gente e mais nada" },
+    { img:"https://images.unsplash.com/photo-1518199266791-5375a83190b7?q=80&w=600&auto=format&fit=crop", legenda:"guardado com carinho" },
+    { img:"https://images.unsplash.com/photo-1494774157365-9e04c6720e47?q=80&w=600&auto=format&fit=crop", legenda:"um pedacinho desse dia" },
+    { img:"https://images.unsplash.com/photo-1522202176988-66273c2fd55f?q=80&w=600&auto=format&fit=crop", legenda:"tão bom lembrar" },
+    { img:"https://images.unsplash.com/photo-1516934024742-b461ee291a55?q=80&w=600&auto=format&fit=crop", legenda:"aquele dia especial" },
+    { img:"https://images.unsplash.com/photo-1503104834685-7205e8607eb9?q=80&w=600&auto=format&fit=crop", legenda:"combinamos bem" },
+    { img:"https://images.unsplash.com/photo-1517841905240-472988babdf9?q=80&w=600&auto=format&fit=crop", legenda:"clique despretensioso" },
+    { img:"https://images.unsplash.com/photo-1529626455594-4ff0802cfb7e?q=80&w=600&auto=format&fit=crop", legenda:"um pedacinho de mim" }
+  ],
+
+  dataDoReencontro: "2026-12-24T18:00:00",
+
+  cartaTexto: `Talvez a distância faça alguns momentos parecerem ainda mais especiais.
+
+Mas espero que, quando sentir saudade, você possa voltar aqui e lembrar de tudo que vivemos.
+
+Algumas pessoas passam pela nossa vida. Outras deixam um pedacinho delas.
+
+Obrigado por todos os momentos.
+
+Até a próxima vez que nossos caminhos se encontrarem.
+
+Com carinho,
+Pietro ♡`
+};
+/* ========================================================================= */
+
+/* ---------- Roteamento: site normal x aba administrativa ---------- */
+function ehRotaAdmin(){
+  const caminho = window.location.pathname.replace(/\/+$/,'');
+  const h = window.location.hash;
+  return caminho.endsWith('/aba-administrativa') || h === '#/aba-administrativa' || h === '#aba-administrativa';
+}
+
+if(ehRotaAdmin()){
+  document.body.classList.add('modo-admin');
+  window.addEventListener('DOMContentLoaded', iniciarAdmin);
+  if(document.readyState !== 'loading') iniciarAdmin();
+} else {
+  window.addEventListener('DOMContentLoaded', iniciarSite);
+  if(document.readyState !== 'loading') iniciarSite();
+}
+
+let siteJaIniciado = false;
+let adminJaIniciado = false;
+
+function comFirebase(cb){
+  if(window.PedacinhoFirebase){ cb(window.PedacinhoFirebase); }
+  else{ window.addEventListener('firebase-pronto', ()=>cb(window.PedacinhoFirebase), {once:true}); }
+}
+
+/* =========================================================================
+   SITE PRINCIPAL
+   ========================================================================= */
+function iniciarSite(){
+  if(siteJaIniciado) return;
+  siteJaIniciado = true;
+
+  // ---------- Foto de abertura ----------
+  function aplicarFotoAbertura(){
+    document.getElementById('fotoAbertura').style.backgroundImage = `url('${CONFIG.fotoAbertura}')`;
+  }
+  aplicarFotoAbertura();
+
+  // ---------- Navegação entre telas ----------
+  const app = document.getElementById('app');
+  const screens = [...document.querySelectorAll('.screen')];
+  const dots = [...document.querySelectorAll('#dots span')];
+
+  function irParaTela(i){
+    screens[i].scrollIntoView({behavior:'smooth'});
+  }
+  dots.forEach(d => d.addEventListener('click', () => irParaTela(parseInt(d.dataset.idx))));
+
+  const obsNav = new IntersectionObserver((entries)=>{
+    entries.forEach(e=>{
+      if(e.isIntersecting){
+        const idx = screens.indexOf(e.target);
+        dots.forEach(d=>d.classList.remove('active'));
+        dots[idx].classList.add('active');
+        onTelaVisivel(idx);
+      }
+    });
+  }, {threshold:.6, root: app});
+  screens.forEach(s=>obsNav.observe(s));
+
+  const telasJaAnimadas = new Set();
+  function onTelaVisivel(idx){
+    if(telasJaAnimadas.has(idx)) return;
+    telasJaAnimadas.add(idx);
+    if(idx===3) gerarEstrelas();
+  }
+
+  // ---------- Partículas flutuantes tela 1 ----------
+  function criarParticulas(container, simbolos, qtd){
+    for(let i=0;i<qtd;i++){
+      const el = document.createElement('span');
+      el.className='particle';
+      el.textContent = simbolos[Math.floor(Math.random()*simbolos.length)];
+      el.style.left = Math.random()*100+'%';
+      el.style.bottom = '-40px';
+      el.style.fontSize = (10+Math.random()*10)+'px';
+      el.style.opacity = (.4+Math.random()*.3).toFixed(2);
+      el.style.animation = `floatUp ${9+Math.random()*7}s linear ${Math.random()*8}s infinite`;
+      container.appendChild(el);
+    }
+  }
+  criarParticulas(document.getElementById('particulas-tela1'), ['♡','✦'], 8);
+
+  document.getElementById('btnComecar').addEventListener('click', (e)=>{
+    const btn = e.currentTarget;
+    btn.style.transform='scale(.9)';
+    setTimeout(()=>btn.style.transform='',180);
+    const rect = btn.getBoundingClientRect();
+    for(let i=0;i<10;i++){
+      const h = document.createElement('span');
+      h.textContent='♡'; h.className='particle';
+      h.style.position='fixed';
+      h.style.fontSize='18px'; h.style.color='#ffd7e6';
+      h.style.top = rect.top+'px';
+      h.style.animation = `floatUpBurst ${1.6+Math.random()}s ease-out forwards`;
+      h.style.left = (rect.left + rect.width/2 + (Math.random()*80-40))+'px';
+      document.body.appendChild(h);
+      setTimeout(()=>h.remove(), 2600);
+    }
+    setTimeout(()=>irParaTela(1), 350);
+  });
+
+  // ---------- TELA 2 — Mural de lembranças ----------
+  const mural = document.getElementById('mural');
+  function renderMural(){
+    mural.innerHTML = '';
+    CONFIG.mural.forEach((item,i)=>{
+      const rot = (Math.random()*6-3).toFixed(1)+'deg';
+      const card = document.createElement('div');
+      card.className='cartao';
+      card.style.setProperty('--rot', rot);
+      card.style.setProperty('--delay', (i*0.3)+'s');
+      card.innerHTML = `<div class="tachinha" style="background:${item.tachinha||'#ff7fa3'}"></div>
+        <span class="icone">${item.icone||'💌'}</span>
+        <span class="rotulo">${item.rotulo||''}</span>`;
+      card.addEventListener('click', ()=>abrirModalMemoria(i));
+      mural.appendChild(card);
+    });
+  }
+  renderMural();
+
+  function abrirModalMemoria(i){
+    const item = CONFIG.mural[i];
+    if(!item) return;
+    const overlay = document.getElementById('modalOverlay');
+    const conteudo = document.getElementById('modalConteudo');
+    let html = `<h3>${item.titulo||item.rotulo||''}</h3>`;
+
+    if(item.tipo === 'foto'){
+      html += `<img class="polaroid-modal-img" src="${item.fotoUrl||''}" alt="foto">`;
+    } else if(item.tipo === 'mp3'){
+      html += `<div class="player">
+          <button id="playBtn">▶</button>
+          <div class="info"><b>${item.mp3Titulo||'Música'}</b><span>toque para ouvir</span></div>
+        </div>
+        <audio id="audioPlayer" src="${item.mp3Url||''}"></audio>`;
+    } else if(item.tipo === 'video'){
+      html += `<video class="modal-video" src="${item.videoUrl||''}" controls playsinline></video>`;
+    } else if(item.tipo === 'link'){
+      html += `<p>${item.linkDescricao||''}</p>
+        <a class="modal-link-btn" href="${item.linkUrl||'#'}" target="_blank" rel="noopener">${item.linkLabel||'Abrir link'}</a>`;
+    } else if(item.tipo === 'versiculo'){
+      html += `<p>“${item.versTexto||''}”</p>
+        <p class="modal-versiculo-ref">${item.versLivro||''} ${item.versCap||''}:${item.versVers||''}</p>`;
+    } else {
+      html += `<p>${item.texto||''}</p>`;
+    }
+
+    conteudo.innerHTML = html;
+    overlay.classList.add('aberto');
+
+    if(item.tipo === 'mp3'){
+      const audio = document.getElementById('audioPlayer');
+      const playBtn = document.getElementById('playBtn');
+      playBtn.addEventListener('click', ()=>{
+        if(!item.mp3Url){ playBtn.textContent='♡'; return; }
+        if(audio.paused){ audio.play(); playBtn.textContent='❚❚'; }
+        else{ audio.pause(); playBtn.textContent='▶'; }
+      });
+    }
+  }
+  document.getElementById('modalFechar').addEventListener('click', fecharModal);
+  document.getElementById('modalOverlay').addEventListener('click', (e)=>{
+    if(e.target.id==='modalOverlay') fecharModal();
+  });
+  function fecharModal(){
+    document.getElementById('modalOverlay').classList.remove('aberto');
+    const audio = document.getElementById('audioPlayer');
+    if(audio) audio.pause();
+  }
+
+  // ---------- TELA 3 — Álbum de Polaroids ----------
+  const decorTela3 = document.getElementById('decor-tela3');
+  const nuvens = ['✦','✧'];
+  // decoração concentrada nas bordas, longe das fotos, para não poluir o mural
+  const zonasDecor = [
+    {top:'4%', left:'8%'}, {top:'6%', left:'88%'}, {top:'22%', left:'3%'},
+    {top:'18%', left:'93%'}, {top:'46%', left:'4%'}, {top:'50%', left:'92%'},
+    {top:'72%', left:'6%'}, {top:'78%', left:'90%'}
+  ];
+  zonasDecor.forEach((zona,i)=>{
+    const el = document.createElement('span');
+    el.className='nuvem';
+    el.textContent = nuvens[i%nuvens.length];
+    el.style.position='absolute';
+    el.style.left = zona.left;
+    el.style.top = zona.top;
+    el.style.fontSize=(11+Math.random()*7)+'px';
+    el.style.opacity = .28+Math.random()*.18;
+    el.style.animation = `gentleFloat ${5+Math.random()*3}s ease-in-out infinite`;
+    el.style.animationDelay = (i*0.4)+'s';
+    decorTela3.appendChild(el);
+  });
+
+  const polContainer = document.getElementById('polaroids-container');
+  function renderPolaroids(){
+    polContainer.innerHTML = '';
+    (CONFIG.polaroids||[]).forEach((p,i)=>{
+      const src = typeof p === 'string' ? p : (p.img||'');
+      const legenda = typeof p === 'string' ? '' : (p.legenda||'');
+      const rot = (Math.random()*10-5).toFixed(1);
+      const div = document.createElement('div');
+      div.className='polaroid';
+      div.style.setProperty('--rot', rot+'deg');
+      div.style.transform = `rotate(${rot}deg)`;
+      div.style.setProperty('--delay', ((i%6)*0.35)+'s');
+      div.innerHTML = `<div class="fita"></div>
+        <div class="moldura"><img src="${src}" alt=""></div>
+        <div class="legenda">${legenda}</div>`;
+      div.addEventListener('click', ()=>focarPolaroid(div));
+      polContainer.appendChild(div);
+    });
+  }
+  renderPolaroids();
+
+  let polaroidAberta = null;
+  let polaroidPlaceholder = null;
+  function focarPolaroid(div){
+    polaroidAberta = div;
+    div.dataset.origStyle = div.getAttribute('style') || '';
+    // move o polaroid para fora do container com scroll-snap: em alguns
+    // navegadores (Safari/iOS), position:fixed dentro de um contêiner com
+    // scroll-snap não fica realmente fixo em relação à tela.
+    polaroidPlaceholder = document.createComment('polaroid-placeholder');
+    div.parentNode.insertBefore(polaroidPlaceholder, div);
+    document.body.appendChild(div);
+    document.getElementById('album-blur').classList.add('aberto');
+    document.getElementById('voltar-polaroid').classList.add('aberto');
+    div.classList.add('focado');
+  }
+  document.getElementById('voltar-polaroid').addEventListener('click', fecharPolaroid);
+  document.getElementById('album-blur').addEventListener('click', fecharPolaroid);
+  function fecharPolaroid(){
+    if(!polaroidAberta) return;
+    polaroidAberta.classList.remove('focado');
+    polaroidAberta.setAttribute('style', polaroidAberta.dataset.origStyle);
+    if(polaroidPlaceholder && polaroidPlaceholder.parentNode){
+      polaroidPlaceholder.parentNode.insertBefore(polaroidAberta, polaroidPlaceholder);
+      polaroidPlaceholder.remove();
+    }
+    document.getElementById('album-blur').classList.remove('aberto');
+    document.getElementById('voltar-polaroid').classList.remove('aberto');
+    polaroidAberta = null;
+    polaroidPlaceholder = null;
+  }
+
+  // ---------- TELA 4 — Céu estrelado ----------
+  let estrelasGeradas = false;
+  function gerarEstrelas(){
+    if(estrelasGeradas) return;
+    estrelasGeradas = true;
+    const cont = document.getElementById('estrelas-container');
+    for(let i=0;i<60;i++){
+      const s = document.createElement('div');
+      s.className='estrela';
+      const tam = (1+Math.random()*2.4).toFixed(1);
+      s.style.width = tam+'px'; s.style.height = tam+'px';
+      s.style.left = Math.random()*100+'%';
+      s.style.top = Math.random()*80+'%';
+      s.style.animationDelay = (Math.random()*3)+'s';
+      s.style.animationDuration = (1.8+Math.random()*2.4)+'s';
+      cont.appendChild(s);
+    }
+    const venus = document.createElement('div');
+    venus.className='planeta venus';
+    venus.style.left='28%'; venus.style.top='22%';
+    const venusLabel = document.createElement('div');
+    venusLabel.className='planeta-label'; venusLabel.textContent='Vênus';
+    venusLabel.style.left='24%'; venusLabel.style.top='27%';
+
+    const jupiter = document.createElement('div');
+    jupiter.className='planeta jupiter';
+    jupiter.style.left='68%'; jupiter.style.top='16%';
+    const jupiterLabel = document.createElement('div');
+    jupiterLabel.className='planeta-label'; jupiterLabel.textContent='Júpiter';
+    jupiterLabel.style.left='64%'; jupiterLabel.style.top='21%';
+
+    [venus,jupiter].forEach(p=>{
+      p.addEventListener('click', ()=>{
+        p.classList.add('brilhar');
+        setTimeout(()=>p.classList.remove('brilhar'), 900);
+      });
+    });
+    cont.appendChild(venus); cont.appendChild(venusLabel);
+    cont.appendChild(jupiter); cont.appendChild(jupiterLabel);
+
+    setInterval(()=>{
+      if(Math.random()<0.35) criarEstrelaCadente(cont);
+    }, 4500);
+  }
+  function criarEstrelaCadente(cont){
+    const e = document.createElement('div');
+    e.className='estrela-cadente';
+    e.style.left = (20+Math.random()*60)+'%';
+    e.style.top = (5+Math.random()*20)+'%';
+    cont.appendChild(e);
+    setTimeout(()=>e.remove(), 1700);
+  }
+
+  // ---------- TELA 5 — Contagem para o reencontro ----------
+  const decorTela5 = document.getElementById('decor-tela5');
+  const simbolosT5 = ['♡','✦','🌸'];
+  const zonasT5 = [
+    {top:'8%', left:'10%'}, {top:'12%', left:'85%'}, {top:'85%', left:'12%'},
+    {top:'80%', left:'88%'}, {top:'45%', left:'5%'}, {top:'40%', left:'94%'}
+  ];
+  zonasT5.forEach((zona,i)=>{
+    const el = document.createElement('span');
+    el.textContent = simbolosT5[i%simbolosT5.length];
+    el.style.position='absolute';
+    el.style.left = zona.left;
+    el.style.top = zona.top;
+    el.style.fontSize=(13+Math.random()*8)+'px';
+    el.style.opacity = .28+Math.random()*.22;
+    el.style.animation = `gentleFloat ${4+Math.random()*3}s ease-in-out infinite`;
+    el.style.animationDelay = (i*0.35)+'s';
+    decorTela5.appendChild(el);
+  });
+
+  let contadorInterval = null;
+  function iniciarContador(){
+    if(contadorInterval) clearInterval(contadorInterval);
+    const dataAlvo = new Date(CONFIG.dataDoReencontro).getTime();
+    function atualizarContador(){
+      const agora = Date.now();
+      const diff = dataAlvo - agora;
+      if(diff <= 0){
+        document.getElementById('contador').style.display='none';
+        const msg = document.getElementById('chegouMsg');
+        msg.style.display='block';
+        if(!msg.dataset.animado){
+          msg.dataset.animado='1';
+          celebrar();
+        }
+        return;
+      }
+      document.getElementById('contador').style.display='flex';
+      document.getElementById('chegouMsg').style.display='none';
+      const dias = Math.floor(diff/(1000*60*60*24));
+      const horas = Math.floor((diff/(1000*60*60))%24);
+      const min = Math.floor((diff/(1000*60))%60);
+      const seg = Math.floor((diff/1000)%60);
+      document.getElementById('c-dias').textContent = String(dias).padStart(3,'0');
+      document.getElementById('c-horas').textContent = String(horas).padStart(2,'0');
+      document.getElementById('c-min').textContent = String(min).padStart(2,'0');
+      document.getElementById('c-seg').textContent = String(seg).padStart(2,'0');
+    }
+    atualizarContador();
+    contadorInterval = setInterval(atualizarContador, 1000);
+  }
+  iniciarContador();
+
+  function celebrar(){
+    const tela = document.getElementById('tela5');
+    const simbolos = ['❤','✨','🎉','♡','⭐'];
+    for(let i=0;i<40;i++){
+      const el = document.createElement('span');
+      el.textContent = simbolos[Math.floor(Math.random()*simbolos.length)];
+      el.style.position='absolute';
+      el.style.left = Math.random()*100+'%';
+      el.style.bottom='-10px';
+      el.style.fontSize=(14+Math.random()*16)+'px';
+      el.style.animation = `floatUp ${2+Math.random()*2.5}s ease-out ${Math.random()*1.5}s forwards`;
+      tela.appendChild(el);
+      setTimeout(()=>el.remove(), 6000);
+    }
+  }
+
+  // ---------- TELA 6 — Carta final (envelope fechado -> carta em tela cheia) ----------
+  function renderCartaTexto(){
+    document.getElementById('cartaTextoCheia').innerHTML = (CONFIG.cartaTexto||'')
+      .split('\n\n').map(p=>`<p>${p.replace(/\n/g,'<br>')}</p>`).join('');
+  }
+  renderCartaTexto();
+
+  let cartaAberta = false;
+  function abrirCarta(){
+    if(cartaAberta) return;
+    cartaAberta = true;
+    document.getElementById('btnAbrirCarta').style.display = 'none';
+    document.getElementById('envelopeTampa').classList.add('aberta');
+    document.getElementById('envelopeCoracao').classList.add('escondido');
+    setTimeout(()=>{
+      document.getElementById('cartaPapelPeek').classList.add('subiu');
+    }, 420);
+    setTimeout(()=>{
+      document.getElementById('cartaFullscreen').classList.add('aberta');
+    }, 950);
+  }
+  function fecharCarta(){
+    if(!cartaAberta) return;
+    document.getElementById('cartaFullscreen').classList.remove('aberta');
+    document.getElementById('cartaFullscreen').scrollTop = 0;
+    setTimeout(()=>{
+      document.getElementById('cartaPapelPeek').classList.remove('subiu');
+    }, 550);
+    setTimeout(()=>{
+      document.getElementById('envelopeTampa').classList.remove('aberta');
+      document.getElementById('envelopeCoracao').classList.remove('escondido');
+    }, 1050);
+    setTimeout(()=>{
+      document.getElementById('btnAbrirCarta').style.display = '';
+      cartaAberta = false;
+    }, 1400);
+  }
+  document.getElementById('btnAbrirCarta').addEventListener('click', abrirCarta);
+  document.getElementById('btnFecharCarta').addEventListener('click', fecharCarta);
+
+  // ---------- Integração com Firebase: aplica config remoto em tempo real ----------
+  comFirebase((fb)=>{
+    fb.escutarConfig((dados)=>{
+      if(dados.fotoAbertura){ CONFIG.fotoAbertura = dados.fotoAbertura; aplicarFotoAbertura(); }
+      if(Array.isArray(dados.mural) && dados.mural.length){ CONFIG.mural = dados.mural; renderMural(); }
+      if(Array.isArray(dados.polaroids)){ CONFIG.polaroids = dados.polaroids; renderPolaroids(); }
+      if(dados.dataDoReencontro){ CONFIG.dataDoReencontro = dados.dataDoReencontro; iniciarContador(); }
+      if(typeof dados.cartaTexto === 'string' && dados.cartaTexto.trim()){ CONFIG.cartaTexto = dados.cartaTexto; renderCartaTexto(); }
+    });
+  });
+}
+
+/* =========================================================================
+   ABA ADMINISTRATIVA (/aba-administrativa)
+   ========================================================================= */
+function iniciarAdmin(){
+  if(adminJaIniciado) return;
+  adminJaIniciado = true;
+
+  const TIPOS_MURAL = ['texto','foto','mp3','link','video','versiculo'];
+  let configAtual = JSON.parse(JSON.stringify(CONFIG)); // cópia local pra edição
+  let fotoAberturaBase64Temp = null;
+
+  function comprimirImagem(file, ladoMax, qualidade){
+    ladoMax = ladoMax || 900; qualidade = qualidade || 0.72;
+    return new Promise((resolve, reject)=>{
+      const leitor = new FileReader();
+      leitor.onload = (e)=>{
+        const img = new Image();
+        img.onload = ()=>{
+          let w = img.width, h = img.height;
+          if(w > h && w > ladoMax){ h = Math.round(h*(ladoMax/w)); w = ladoMax; }
+          else if(h >= w && h > ladoMax){ w = Math.round(w*(ladoMax/h)); h = ladoMax; }
+          const canvas = document.createElement('canvas');
+          canvas.width = w; canvas.height = h;
+          canvas.getContext('2d').drawImage(img,0,0,w,h);
+          resolve(canvas.toDataURL('image/jpeg', qualidade));
+        };
+        img.onerror = reject;
+        img.src = e.target.result;
+      };
+      leitor.onerror = reject;
+      leitor.readAsDataURL(file);
+    });
+  }
+
+  function mostrarMsg(elId, texto, tempo){
+    const el = document.getElementById(elId);
+    el.textContent = texto;
+    setTimeout(()=>{ if(el.textContent===texto) el.textContent=''; }, tempo||3000);
+  }
+
+  comFirebase((fb)=>{
+    // ---------- LOGIN ----------
+    document.getElementById('adminLoginForm').addEventListener('submit', async (e)=>{
+      e.preventDefault();
+      const email = document.getElementById('adminEmail').value.trim();
+      const senha = document.getElementById('adminSenha').value;
+      const erroEl = document.getElementById('adminLoginErro');
+      erroEl.textContent = '';
+      try{
+        await fb.login(email, senha);
+      }catch(err){
+        erroEl.textContent = 'E-mail ou senha inválidos.';
+      }
+    });
+
+    document.getElementById('btnAdminLogout').addEventListener('click', async ()=>{
+      await fb.logout();
+    });
+
+    fb.onAuth(async (user)=>{
+      const loginCaixa = document.getElementById('adminLoginCaixa');
+      const carregando = document.getElementById('adminCarregando');
+      const dashboard = document.getElementById('adminDashboard');
+      const logoutBtn = document.getElementById('btnAdminLogout');
+
+      if(user){
+        loginCaixa.style.display = 'none';
+        logoutBtn.style.display = '';
+        carregando.style.display = 'block';
+        dashboard.style.display = 'none';
+
+        const dados = await fb.carregarConfigUmaVez();
+        if(dados){
+          if(dados.fotoAbertura) configAtual.fotoAbertura = dados.fotoAbertura;
+          if(Array.isArray(dados.mural) && dados.mural.length) configAtual.mural = dados.mural;
+          if(Array.isArray(dados.polaroids)) configAtual.polaroids = dados.polaroids;
+          if(dados.dataDoReencontro) configAtual.dataDoReencontro = dados.dataDoReencontro;
+          if(typeof dados.cartaTexto === 'string' && dados.cartaTexto.trim()) configAtual.cartaTexto = dados.cartaTexto;
+        }
+
+        preencherFormularios();
+        carregando.style.display = 'none';
+        dashboard.style.display = 'block';
+      } else {
+        logoutBtn.style.display = 'none';
+        dashboard.style.display = 'none';
+        carregando.style.display = 'none';
+        loginCaixa.style.display = 'block';
+      }
+    });
+
+    function preencherFormularios(){
+      // Foto de abertura
+      const preview = document.getElementById('adminFotoAberturaPreview');
+      preview.src = configAtual.fotoAbertura || '';
+      preview.style.display = configAtual.fotoAbertura ? 'block' : 'none';
+
+      document.getElementById('adminFotoAberturaInput').addEventListener('change', async (e)=>{
+        const file = e.target.files[0];
+        if(!file) return;
+        const base64 = await comprimirImagem(file, 1100, 0.75);
+        fotoAberturaBase64Temp = base64;
+        preview.src = base64;
+        preview.style.display = 'block';
+      });
+      document.getElementById('adminSalvarFotoAbertura').addEventListener('click', async ()=>{
+        if(!fotoAberturaBase64Temp){ mostrarMsg('adminMsgFotoAbertura','Escolha uma foto primeiro.'); return; }
+        try{
+          await fb.salvarConfig({ fotoAbertura: fotoAberturaBase64Temp });
+          configAtual.fotoAbertura = fotoAberturaBase64Temp;
+          mostrarMsg('adminMsgFotoAbertura','Foto salva! ✓');
+        }catch(err){
+          mostrarMsg('adminMsgFotoAbertura','Erro ao salvar: '+err.message, 5000);
+        }
+      });
+
+      // Cartões do mural
+      renderAdminMural();
+
+      // Polaroids
+      renderAdminPolaroids();
+
+      // Data do reencontro
+      const dataInput = document.getElementById('adminDataReencontro');
+      if(configAtual.dataDoReencontro){
+        const d = new Date(configAtual.dataDoReencontro);
+        if(!isNaN(d)){
+          const pad = n => String(n).padStart(2,'0');
+          dataInput.value = `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
+        }
+      }
+      document.getElementById('adminSalvarData').addEventListener('click', async ()=>{
+        if(!dataInput.value){ mostrarMsg('adminMsgData','Escolha uma data.'); return; }
+        try{
+          await fb.salvarConfig({ dataDoReencontro: dataInput.value });
+          mostrarMsg('adminMsgData','Data salva! ✓');
+        }catch(err){
+          mostrarMsg('adminMsgData','Erro ao salvar: '+err.message, 5000);
+        }
+      });
+
+      // Carta
+      const cartaTextarea = document.getElementById('adminCartaTexto');
+      cartaTextarea.value = configAtual.cartaTexto || '';
+      document.getElementById('adminSalvarCarta').addEventListener('click', async ()=>{
+        try{
+          await fb.salvarConfig({ cartaTexto: cartaTextarea.value });
+          mostrarMsg('adminMsgCarta','Carta salva! ✓');
+        }catch(err){
+          mostrarMsg('adminMsgCarta','Erro ao salvar: '+err.message, 5000);
+        }
+      });
+    }
+
+    // ---------- Cartões do mural ----------
+    function renderAdminMural(){
+      const lista = document.getElementById('adminMuralLista');
+      lista.innerHTML = '';
+      configAtual.mural.forEach((item, i)=>{
+        const bloco = document.createElement('div');
+        bloco.className = 'admin-cartao-mural';
+        bloco.innerHTML = `
+          <h3>Cartão ${i+1}</h3>
+          <div class="admin-campo">
+            <label>Ícone (emoji)</label>
+            <input type="text" data-campo="icone" value="${item.icone||''}">
+          </div>
+          <div class="admin-campo">
+            <label>Rótulo (texto pequeno no cartão)</label>
+            <input type="text" data-campo="rotulo" value="${item.rotulo||''}">
+          </div>
+          <div class="admin-campo">
+            <label>Título (ao abrir)</label>
+            <input type="text" data-campo="titulo" value="${item.titulo||''}">
+          </div>
+          <div class="admin-campo">
+            <label>Tipo de conteúdo</label>
+            <select data-campo="tipo">
+              <option value="texto">Texto</option>
+              <option value="foto">Foto</option>
+              <option value="mp3">MP3 (link)</option>
+              <option value="link">Link</option>
+              <option value="video">Vídeo (link)</option>
+              <option value="versiculo">Versículo</option>
+            </select>
+          </div>
+
+          <div class="admin-campos-tipo" data-tipo-campos="texto">
+            <div class="admin-campo"><label>Texto</label><textarea data-campo="texto">${item.texto||''}</textarea></div>
+          </div>
+
+          <div class="admin-campos-tipo" data-tipo-campos="foto">
+            <div class="admin-campo"><label>Foto</label><input type="file" accept="image/*" data-campo-arquivo="fotoUrl"></div>
+            <img class="admin-preview-img" data-preview="fotoUrl" src="${item.fotoUrl||''}" style="${item.fotoUrl?'':'display:none;'}">
+          </div>
+
+          <div class="admin-campos-tipo" data-tipo-campos="mp3">
+            <div class="admin-campo"><label>Título da música</label><input type="text" data-campo="mp3Titulo" value="${item.mp3Titulo||''}"></div>
+            <div class="admin-campo"><label>Link do mp3</label><input type="url" data-campo="mp3Url" value="${item.mp3Url||''}" placeholder="https://...mp3"></div>
+          </div>
+
+          <div class="admin-campos-tipo" data-tipo-campos="link">
+            <div class="admin-campo"><label>Descrição</label><textarea data-campo="linkDescricao">${item.linkDescricao||''}</textarea></div>
+            <div class="admin-campo"><label>Texto do botão</label><input type="text" data-campo="linkLabel" value="${item.linkLabel||''}" placeholder="Abrir link"></div>
+            <div class="admin-campo"><label>URL</label><input type="url" data-campo="linkUrl" value="${item.linkUrl||''}" placeholder="https://..."></div>
+          </div>
+
+          <div class="admin-campos-tipo" data-tipo-campos="video">
+            <div class="admin-campo"><label>Link do vídeo (mp4)</label><input type="url" data-campo="videoUrl" value="${item.videoUrl||''}" placeholder="https://...mp4"></div>
+          </div>
+
+          <div class="admin-campos-tipo" data-tipo-campos="versiculo">
+            <div class="admin-campo"><label>Texto do versículo</label><textarea data-campo="versTexto">${item.versTexto||''}</textarea></div>
+            <div class="admin-campo"><label>Livro</label><input type="text" data-campo="versLivro" value="${item.versLivro||''}"></div>
+            <div class="admin-campo"><label>Capítulo</label><input type="text" data-campo="versCap" value="${item.versCap||''}"></div>
+            <div class="admin-campo"><label>Versículo</label><input type="text" data-campo="versVers" value="${item.versVers||''}"></div>
+          </div>
+
+          <div style="margin-top:10px;">
+            <button class="admin-btn" data-acao="salvar-cartao">Salvar cartão ${i+1}</button>
+          </div>
+        `;
+        lista.appendChild(bloco);
+
+        const selectTipo = bloco.querySelector('[data-campo="tipo"]');
+        selectTipo.value = item.tipo || 'texto';
+
+        function atualizarVisibilidadeTipo(){
+          TIPOS_MURAL.forEach(t=>{
+            const grupo = bloco.querySelector(`[data-tipo-campos="${t}"]`);
+            if(grupo) grupo.classList.toggle('ativo', t === selectTipo.value);
+          });
+        }
+        atualizarVisibilidadeTipo();
+        selectTipo.addEventListener('change', atualizarVisibilidadeTipo);
+
+        const inputFotoCartao = bloco.querySelector('[data-campo-arquivo="fotoUrl"]');
+        let fotoCartaoBase64Temp = null;
+        if(inputFotoCartao){
+          inputFotoCartao.addEventListener('change', async (e)=>{
+            const file = e.target.files[0];
+            if(!file) return;
+            const base64 = await comprimirImagem(file, 900, 0.72);
+            fotoCartaoBase64Temp = base64;
+            const prev = bloco.querySelector('[data-preview="fotoUrl"]');
+            prev.src = base64; prev.style.display = 'block';
+          });
+        }
+
+        bloco.querySelector('[data-acao="salvar-cartao"]').addEventListener('click', async ()=>{
+          const novoItem = { ...item };
+          novoItem.icone = bloco.querySelector('[data-campo="icone"]').value;
+          novoItem.rotulo = bloco.querySelector('[data-campo="rotulo"]').value;
+          novoItem.titulo = bloco.querySelector('[data-campo="titulo"]').value;
+          novoItem.tipo = selectTipo.value;
+          novoItem.texto = bloco.querySelector('[data-campo="texto"]').value;
+          novoItem.fotoUrl = fotoCartaoBase64Temp || item.fotoUrl || '';
+          novoItem.mp3Titulo = bloco.querySelector('[data-campo="mp3Titulo"]').value;
+          novoItem.mp3Url = bloco.querySelector('[data-campo="mp3Url"]').value;
+          novoItem.linkDescricao = bloco.querySelector('[data-campo="linkDescricao"]').value;
+          novoItem.linkLabel = bloco.querySelector('[data-campo="linkLabel"]').value;
+          novoItem.linkUrl = bloco.querySelector('[data-campo="linkUrl"]').value;
+          novoItem.videoUrl = bloco.querySelector('[data-campo="videoUrl"]').value;
+          novoItem.versTexto = bloco.querySelector('[data-campo="versTexto"]').value;
+          novoItem.versLivro = bloco.querySelector('[data-campo="versLivro"]').value;
+          novoItem.versCap = bloco.querySelector('[data-campo="versCap"]').value;
+          novoItem.versVers = bloco.querySelector('[data-campo="versVers"]').value;
+
+          configAtual.mural[i] = novoItem;
+          try{
+            await fb.salvarConfig({ mural: configAtual.mural });
+            mostrarMsg('adminMsgMural', `Cartão ${i+1} salvo! ✓`);
+          }catch(err){
+            mostrarMsg('adminMsgMural','Erro ao salvar: '+err.message, 5000);
+          }
+        });
+      });
+    }
+
+    // ---------- Polaroids ----------
+    function renderAdminPolaroids(){
+      const lista = document.getElementById('adminPolaroidsLista');
+      lista.innerHTML = '';
+      (configAtual.polaroids||[]).forEach((p,i)=>{
+        const src = typeof p === 'string' ? p : (p.img||'');
+        const legenda = typeof p === 'string' ? '' : (p.legenda||'');
+        const linha = document.createElement('div');
+        linha.className = 'admin-polaroid-item';
+        linha.innerHTML = `
+          <img src="${src}" alt="">
+          <div class="campos">
+            <input type="text" data-campo="legenda" value="${legenda}" placeholder="legenda">
+            <button class="admin-btn secundario" data-acao="salvar-legenda" style="padding:6px 14px;font-size:12px;">Salvar legenda</button>
+          </div>
+          <button class="admin-remover" data-acao="remover" title="Remover">✕</button>
+        `;
+        lista.appendChild(linha);
+
+        linha.querySelector('[data-acao="salvar-legenda"]').addEventListener('click', async ()=>{
+          const novaLegenda = linha.querySelector('[data-campo="legenda"]').value;
+          const atual = configAtual.polaroids[i];
+          configAtual.polaroids[i] = typeof atual === 'string'
+            ? { img: atual, legenda: novaLegenda }
+            : { ...atual, legenda: novaLegenda };
+          try{
+            await fb.salvarConfig({ polaroids: configAtual.polaroids });
+            mostrarMsg('adminMsgPolaroids','Legenda salva! ✓');
+          }catch(err){
+            mostrarMsg('adminMsgPolaroids','Erro ao salvar: '+err.message, 5000);
+          }
+        });
+
+        linha.querySelector('[data-acao="remover"]').addEventListener('click', async ()=>{
+          configAtual.polaroids.splice(i,1);
+          try{
+            await fb.salvarConfig({ polaroids: configAtual.polaroids });
+            mostrarMsg('adminMsgPolaroids','Polaroid removida.');
+          }catch(err){
+            mostrarMsg('adminMsgPolaroids','Erro ao remover: '+err.message, 5000);
+          }
+          renderAdminPolaroids();
+        });
+      });
+    }
+
+    document.getElementById('adminAdicionarPolaroid').addEventListener('click', async ()=>{
+      const arquivo = document.getElementById('adminNovaPolaroidArquivo').files[0];
+      const legenda = document.getElementById('adminNovaPolaroidLegenda').value;
+      if(!arquivo){ mostrarMsg('adminMsgPolaroids','Escolha uma foto primeiro.'); return; }
+      const base64 = await comprimirImagem(arquivo, 800, 0.7);
+      configAtual.polaroids = configAtual.polaroids || [];
+      configAtual.polaroids.push({ img: base64, legenda: legenda });
+      try{
+        await fb.salvarConfig({ polaroids: configAtual.polaroids });
+        mostrarMsg('adminMsgPolaroids','Polaroid adicionada! ✓');
+        document.getElementById('adminNovaPolaroidArquivo').value = '';
+        document.getElementById('adminNovaPolaroidLegenda').value = '';
+        renderAdminPolaroids();
+      }catch(err){
+        mostrarMsg('adminMsgPolaroids','Erro ao adicionar: '+err.message, 5000);
+      }
+    });
+  });
+}
+</script>
+</body>
+</html>
