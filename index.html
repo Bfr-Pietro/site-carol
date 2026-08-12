@@ -59,6 +59,24 @@ body.modo-admin #dots, body.modo-admin #app{ display:none !important; }
   text-align:center;
 }
 
+/* ============ TELA DE CARREGAMENTO ============ */
+#carregandoSite{
+  position:fixed; inset:0; z-index:2000;
+  background:var(--creme);
+  display:flex; align-items:center; justify-content:center;
+  flex-direction:column;
+  transition:opacity .5s ease;
+}
+#carregandoSite .carregando-coracao{
+  font-size:34px; color:var(--vermelho-detalhe);
+  animation:pulse 1.3s ease-in-out infinite;
+}
+#carregandoSite .carregando-texto{
+  margin-top:10px; font-size:12.5px; color:var(--texto-suave);
+  letter-spacing:.03em; font-family:var(--font-corpo);
+}
+body.modo-admin #carregandoSite{ display:none !important; }
+
 /* ============ DOTS DE NAVEGAÇÃO ============ */
 #dots{
   position:fixed;
@@ -591,6 +609,14 @@ body.modo-admin #adminPanel{ display:block; }
 </head>
 <body>
 
+<!-- Tela de carregamento: fica visível até sabermos se há dados salvos no
+     banco. Assim o site nunca mostra o conteúdo genérico pra depois trocar
+     pelo conteúdo real (ou vice-versa) — evita a "piscada". -->
+<div id="carregandoSite">
+  <span class="carregando-coracao">♡</span>
+  <span class="carregando-texto">carregando...</span>
+</div>
+
 <div id="dots">
   <span data-idx="0" class="active"></span>
   <span data-idx="1"></span>
@@ -779,7 +805,8 @@ body.modo-admin #adminPanel{ display:block; }
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-app.js";
 import {
-  getFirestore, doc, getDoc, setDoc, onSnapshot
+  getFirestore, doc, getDoc, setDoc, onSnapshot,
+  collection, getDocs, addDoc, updateDoc, deleteDoc, deleteField, query, orderBy
 } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js";
 import {
   getAuth, signInWithEmailAndPassword, onAuthStateChanged, signOut
@@ -801,6 +828,10 @@ const CONFIG_REF = doc(db, "config", "site");
 // limite de 1MB do documento principal "config/site" quando alguém
 // adiciona uma música).
 const MP3_REF_COLECAO = "mp3";
+// Coleção própria pra guardar as polaroids, uma por documento (preserva
+// imagem, legenda e ordem). Segue o mesmo padrão já usado pro mp3: assim
+// as polaroids não dividem documento com o resto do config/site.
+const POLAROIDS_COLECAO = "polaroids";
 
 window.PedacinhoFirebase = {
   async carregarConfigUmaVez(){
@@ -846,6 +877,60 @@ window.PedacinhoFirebase = {
   },
   onAuth(cb){
     onAuthStateChanged(auth, cb);
+  },
+  // ---------- Polaroids: cada uma é um documento próprio na coleção
+  // "polaroids" (campos: img, legenda, ordem), em vez de um array dentro
+  // de config/site.
+  async carregarPolaroidsUmaVez(){
+    try{
+      const snap = await getDocs(query(collection(db, POLAROIDS_COLECAO), orderBy("ordem")));
+      return snap.docs.map(d=>({ id:d.id, ...d.data() }));
+    }catch(err){
+      console.warn("Não foi possível carregar as polaroids:", err);
+      return [];
+    }
+  },
+  escutarPolaroids(callback){
+    return onSnapshot(query(collection(db, POLAROIDS_COLECAO), orderBy("ordem")), (snap)=>{
+      callback(snap.docs.map(d=>({ id:d.id, ...d.data() })));
+    }, (err)=>{
+      console.warn("Erro ao escutar polaroids:", err);
+    });
+  },
+  async adicionarPolaroid(dados){
+    const ref = await addDoc(collection(db, POLAROIDS_COLECAO), dados);
+    return ref.id;
+  },
+  async atualizarPolaroid(id, dados){
+    await updateDoc(doc(db, POLAROIDS_COLECAO, id), dados);
+  },
+  async removerPolaroid(id){
+    await deleteDoc(doc(db, POLAROIDS_COLECAO, id));
+  },
+  // Migração única: se config/site ainda tiver o array antigo "polaroids",
+  // cria um documento por polaroid na coleção "polaroids" (preservando
+  // imagem, legenda e ordem) e remove o array de dentro do config/site.
+  // Não faz nada se a coleção "polaroids" já tiver documentos (já migrado).
+  async migrarPolaroidsSeNecessario(){
+    try{
+      const snap = await getDoc(CONFIG_REF);
+      const dados = snap.exists() ? snap.data() : null;
+      if(!dados || !Array.isArray(dados.polaroids) || !dados.polaroids.length) return;
+
+      const existentes = await getDocs(collection(db, POLAROIDS_COLECAO));
+      if(!existentes.empty) return;
+
+      for(let i=0;i<dados.polaroids.length;i++){
+        const p = dados.polaroids[i];
+        const img = typeof p === 'string' ? p : (p.img||'');
+        const legenda = typeof p === 'string' ? '' : (p.legenda||'');
+        await addDoc(collection(db, POLAROIDS_COLECAO), { img, legenda, ordem:i });
+      }
+
+      await setDoc(CONFIG_REF, { polaroids: deleteField() }, { merge:true });
+    }catch(err){
+      console.warn("Não foi possível migrar as polaroids:", err);
+    }
   }
 };
 
@@ -875,23 +960,6 @@ const CONFIG = {
       tipo:'texto', texto:"Só passando pra lembrar que você é um dos meus lugares favoritos. ♡" }
   ],
 
-  polaroids: [
-    { img:"https://images.unsplash.com/photo-1522673607200-164d1b6ce486?q=80&w=600&auto=format&fit=crop", legenda:"esse dia foi lindo ♡" },
-    { img:"https://images.unsplash.com/photo-1529333166437-7750a6dd5a70?q=80&w=600&auto=format&fit=crop", legenda:"risadas à toa" },
-    { img:"https://images.unsplash.com/photo-1516589178581-6cd7833ae3b2?q=80&w=600&auto=format&fit=crop", legenda:"olha esse sorriso" },
-    { img:"https://images.unsplash.com/photo-1525258977996-a0edf1451ade?q=80&w=600&auto=format&fit=crop", legenda:"tardezinha boa" },
-    { img:"https://images.unsplash.com/photo-1470116945706-e6bf5d5a53ca?q=80&w=600&auto=format&fit=crop", legenda:"momento favorito" },
-    { img:"https://images.unsplash.com/photo-1495312040802-a929cd14a6ab?q=80&w=600&auto=format&fit=crop", legenda:"saudade boa" },
-    { img:"https://images.unsplash.com/photo-1521543387133-6f3d385e6c9d?q=80&w=600&auto=format&fit=crop", legenda:"a gente e mais nada" },
-    { img:"https://images.unsplash.com/photo-1518199266791-5375a83190b7?q=80&w=600&auto=format&fit=crop", legenda:"guardado com carinho" },
-    { img:"https://images.unsplash.com/photo-1494774157365-9e04c6720e47?q=80&w=600&auto=format&fit=crop", legenda:"um pedacinho desse dia" },
-    { img:"https://images.unsplash.com/photo-1522202176988-66273c2fd55f?q=80&w=600&auto=format&fit=crop", legenda:"tão bom lembrar" },
-    { img:"https://images.unsplash.com/photo-1516934024742-b461ee291a55?q=80&w=600&auto=format&fit=crop", legenda:"aquele dia especial" },
-    { img:"https://images.unsplash.com/photo-1503104834685-7205e8607eb9?q=80&w=600&auto=format&fit=crop", legenda:"combinamos bem" },
-    { img:"https://images.unsplash.com/photo-1517841905240-472988babdf9?q=80&w=600&auto=format&fit=crop", legenda:"clique despretensioso" },
-    { img:"https://images.unsplash.com/photo-1529626455594-4ff0802cfb7e?q=80&w=600&auto=format&fit=crop", legenda:"um pedacinho de mim" }
-  ],
-
   dataDoReencontro: "2026-12-24T18:00:00",
 
   cartaTexto: `Talvez a distância faça alguns momentos parecerem ainda mais especiais.
@@ -907,6 +975,27 @@ Até a próxima vez que nossos caminhos se encontrarem.
 Com carinho,
 Pietro ♡`
 };
+
+// As polaroids agora moram na coleção própria "polaroids" do Firestore
+// (um documento por polaroid, igual já é feito com o mp3). Esta lista aqui
+// é só o conteúdo padrão/genérico usado enquanto o Firestore carrega, ou
+// como fallback caso a coleção esteja vazia.
+const POLAROIDS_PADRAO = [
+  { img:"https://images.unsplash.com/photo-1522673607200-164d1b6ce486?q=80&w=600&auto=format&fit=crop", legenda:"esse dia foi lindo ♡" },
+  { img:"https://images.unsplash.com/photo-1529333166437-7750a6dd5a70?q=80&w=600&auto=format&fit=crop", legenda:"risadas à toa" },
+  { img:"https://images.unsplash.com/photo-1516589178581-6cd7833ae3b2?q=80&w=600&auto=format&fit=crop", legenda:"olha esse sorriso" },
+  { img:"https://images.unsplash.com/photo-1525258977996-a0edf1451ade?q=80&w=600&auto=format&fit=crop", legenda:"tardezinha boa" },
+  { img:"https://images.unsplash.com/photo-1470116945706-e6bf5d5a53ca?q=80&w=600&auto=format&fit=crop", legenda:"momento favorito" },
+  { img:"https://images.unsplash.com/photo-1495312040802-a929cd14a6ab?q=80&w=600&auto=format&fit=crop", legenda:"saudade boa" },
+  { img:"https://images.unsplash.com/photo-1521543387133-6f3d385e6c9d?q=80&w=600&auto=format&fit=crop", legenda:"a gente e mais nada" },
+  { img:"https://images.unsplash.com/photo-1518199266791-5375a83190b7?q=80&w=600&auto=format&fit=crop", legenda:"guardado com carinho" },
+  { img:"https://images.unsplash.com/photo-1494774157365-9e04c6720e47?q=80&w=600&auto=format&fit=crop", legenda:"um pedacinho desse dia" },
+  { img:"https://images.unsplash.com/photo-1522202176988-66273c2fd55f?q=80&w=600&auto=format&fit=crop", legenda:"tão bom lembrar" },
+  { img:"https://images.unsplash.com/photo-1516934024742-b461ee291a55?q=80&w=600&auto=format&fit=crop", legenda:"aquele dia especial" },
+  { img:"https://images.unsplash.com/photo-1503104834685-7205e8607eb9?q=80&w=600&auto=format&fit=crop", legenda:"combinamos bem" },
+  { img:"https://images.unsplash.com/photo-1517841905240-472988babdf9?q=80&w=600&auto=format&fit=crop", legenda:"clique despretensioso" },
+  { img:"https://images.unsplash.com/photo-1529626455594-4ff0802cfb7e?q=80&w=600&auto=format&fit=crop", legenda:"um pedacinho de mim" }
+];
 /* ========================================================================= */
 
 /* ---------- Vídeo: detecta YouTube / Google Drive / link direto ---------- */
@@ -969,7 +1058,6 @@ function iniciarSite(){
   function aplicarFotoAbertura(){
     document.getElementById('fotoAbertura').style.backgroundImage = `url('${CONFIG.fotoAbertura}')`;
   }
-  aplicarFotoAbertura();
 
   // ---------- Navegação entre telas ----------
   const app = document.getElementById('app');
@@ -1056,7 +1144,6 @@ function iniciarSite(){
       mural.appendChild(card);
     });
   }
-  renderMural();
 
   function abrirModalMemoria(i){
     const item = CONFIG.mural[i];
@@ -1159,10 +1246,13 @@ function iniciarSite(){
     decorTela3.appendChild(el);
   });
 
+  // Polaroids atuais (carregadas da coleção "polaroids" do Firestore).
+  // Começa com o conteúdo padrão/genérico até o Firestore responder.
+  let polaroidsAtuais = POLAROIDS_PADRAO;
   const polContainer = document.getElementById('polaroids-container');
   function renderPolaroids(){
     polContainer.innerHTML = '';
-    (CONFIG.polaroids||[]).forEach((p,i)=>{
+    (polaroidsAtuais||[]).forEach((p,i)=>{
       const src = typeof p === 'string' ? p : (p.img||'');
       const legenda = typeof p === 'string' ? '' : (p.legenda||'');
       const rot = (Math.random()*10-5).toFixed(1);
@@ -1178,7 +1268,6 @@ function iniciarSite(){
       polContainer.appendChild(div);
     });
   }
-  renderPolaroids();
 
   let polaroidAberta = null;
   let polaroidPlaceholder = null;
@@ -1315,7 +1404,6 @@ function iniciarSite(){
     atualizarContador();
     contadorInterval = setInterval(atualizarContador, 1000);
   }
-  iniciarContador();
 
   function celebrar(){
     const tela = document.getElementById('tela5');
@@ -1338,7 +1426,6 @@ function iniciarSite(){
     document.getElementById('cartaTextoCheia').innerHTML = (CONFIG.cartaTexto||'')
       .split('\n\n').map(p=>`<p>${p.replace(/\n/g,'<br>')}</p>`).join('');
   }
-  renderCartaTexto();
 
   let cartaAberta = false;
   function abrirCarta(){
@@ -1373,15 +1460,81 @@ function iniciarSite(){
   document.getElementById('btnAbrirCarta').addEventListener('click', abrirCarta);
   document.getElementById('btnFecharCarta').addEventListener('click', fecharCarta);
 
-  // ---------- Integração com Firebase: aplica config remoto em tempo real ----------
-  comFirebase((fb)=>{
+  // ---------- Integração com Firebase ----------
+  // Estratégia: NÃO renderizamos nada com os dados genéricos primeiro.
+  // Esperamos a primeira leitura do Firestore (uma única vez, rápida) e só
+  // então aplicamos tudo de uma vez e revelamos o site — já com o conteúdo
+  // certo desde o primeiro quadro visível, seja ele o salvo no banco ou,
+  // na ausência de dados salvos, o conteúdo genérico padrão. Depois disso,
+  // passamos a escutar atualizações em tempo real normalmente (pra edições
+  // feitas na aba administrativa aparecerem na hora).
+  function aplicarConfigCompleta(){
+    aplicarFotoAbertura();
+    renderMural();
+    renderPolaroids();
+    iniciarContador();
+    renderCartaTexto();
+  }
+
+  function revelarSite(){
+    const overlay = document.getElementById('carregandoSite');
+    if(!overlay) return;
+    overlay.style.opacity = '0';
+    overlay.style.pointerEvents = 'none';
+    setTimeout(()=>overlay.remove(), 500);
+  }
+
+  function mesclarDadosNoConfig(dados){
+    if(!dados) return;
+    if(dados.fotoAbertura) CONFIG.fotoAbertura = dados.fotoAbertura;
+    if(Array.isArray(dados.mural) && dados.mural.length) CONFIG.mural = dados.mural;
+    if(dados.dataDoReencontro) CONFIG.dataDoReencontro = dados.dataDoReencontro;
+    if(typeof dados.cartaTexto === 'string' && dados.cartaTexto.trim()) CONFIG.cartaTexto = dados.cartaTexto;
+  }
+
+  let siteRevelado = false;
+  function revelarUmaVez(){
+    if(siteRevelado) return;
+    siteRevelado = true;
+    aplicarConfigCompleta();
+    revelarSite();
+  }
+
+  // Se por algum motivo o Firebase demorar demais ou falhar (ex: sem
+  // internet, domínio bloqueado), não deixamos o visitante preso na tela
+  // de carregamento pra sempre — depois de alguns segundos mostramos o
+  // site com o conteúdo genérico mesmo.
+  const tempoLimiteCarregamento = setTimeout(revelarUmaVez, 4500);
+
+  comFirebase(async (fb)=>{
     fbSite = fb;
+    try{
+      const dados = await fb.carregarConfigUmaVez();
+      mesclarDadosNoConfig(dados);
+    }catch(err){
+      console.warn('Não foi possível carregar o config inicial:', err);
+    }
+    try{
+      const pols = await fb.carregarPolaroidsUmaVez();
+      if(pols && pols.length) polaroidsAtuais = pols;
+    }catch(err){
+      console.warn('Não foi possível carregar as polaroids iniciais:', err);
+    }
+    clearTimeout(tempoLimiteCarregamento);
+    revelarUmaVez();
+
+    // A partir daqui, qualquer alteração feita na aba administrativa chega
+    // aqui em tempo real e atualiza só a parte que mudou.
     fb.escutarConfig((dados)=>{
       if(dados.fotoAbertura){ CONFIG.fotoAbertura = dados.fotoAbertura; aplicarFotoAbertura(); }
       if(Array.isArray(dados.mural) && dados.mural.length){ CONFIG.mural = dados.mural; renderMural(); }
-      if(Array.isArray(dados.polaroids)){ CONFIG.polaroids = dados.polaroids; renderPolaroids(); }
       if(dados.dataDoReencontro){ CONFIG.dataDoReencontro = dados.dataDoReencontro; iniciarContador(); }
       if(typeof dados.cartaTexto === 'string' && dados.cartaTexto.trim()){ CONFIG.cartaTexto = dados.cartaTexto; renderCartaTexto(); }
+    });
+
+    fb.escutarPolaroids((pols)=>{
+      polaroidsAtuais = pols;
+      renderPolaroids();
     });
   });
 }
@@ -1397,20 +1550,62 @@ function iniciarAdmin(){
   let configAtual = JSON.parse(JSON.stringify(CONFIG)); // cópia local pra edição
   let fotoAberturaBase64Temp = null;
 
-  function comprimirImagem(file, ladoMax, qualidade){
-    ladoMax = ladoMax || 900; qualidade = qualidade || 0.72;
+  // Comprime a imagem e, se ainda assim ela ficar grande demais, tenta de
+  // novo reduzindo qualidade e depois dimensão — repetindo até caber no
+  // limite (tamanhoMaxBytes) ou até bater num piso razoável de qualidade.
+  // Isso garante que a imagem SEMPRE caiba, em vez de comprimir uma vez só
+  // e torcer pra caber (o que falhava com fotos muito grandes/detalhadas).
+  // Obs: o config inteiro do site (foto de abertura + fotos dos cartões +
+  // todas as polaroids + textos) mora no MESMO documento do Firestore, que
+  // tem teto de 1MB — por isso o padrão aqui é conservador (~550KB por
+  // imagem), deixando espaço pras outras fotos que dividem o documento.
+  function comprimirImagem(file, ladoMax, qualidade, tamanhoMaxBytes){
+    ladoMax = ladoMax || 900;
+    qualidade = qualidade || 0.72;
+    tamanhoMaxBytes = tamanhoMaxBytes || 550 * 1024;
+
     return new Promise((resolve, reject)=>{
       const leitor = new FileReader();
       leitor.onload = (e)=>{
         const img = new Image();
         img.onload = ()=>{
-          let w = img.width, h = img.height;
-          if(w > h && w > ladoMax){ h = Math.round(h*(ladoMax/w)); w = ladoMax; }
-          else if(h >= w && h > ladoMax){ w = Math.round(w*(ladoMax/h)); h = ladoMax; }
-          const canvas = document.createElement('canvas');
-          canvas.width = w; canvas.height = h;
-          canvas.getContext('2d').drawImage(img,0,0,w,h);
-          resolve(canvas.toDataURL('image/jpeg', qualidade));
+          function gerarDataUrl(lado, qual){
+            let w = img.width, h = img.height;
+            if(w > h && w > lado){ h = Math.round(h*(lado/w)); w = lado; }
+            else if(h >= w && h > lado){ w = Math.round(w*(lado/h)); h = lado; }
+            const canvas = document.createElement('canvas');
+            canvas.width = w; canvas.height = h;
+            canvas.getContext('2d').drawImage(img,0,0,w,h);
+            return canvas.toDataURL('image/jpeg', qual);
+          }
+          function tamanhoAproxBytes(dataUrl){
+            const base64 = dataUrl.split(',')[1] || '';
+            return Math.floor(base64.length * 0.75);
+          }
+
+          let lado = ladoMax;
+          let qual = qualidade;
+          let resultado = gerarDataUrl(lado, qual);
+          let tentativas = 0;
+
+          while(tamanhoAproxBytes(resultado) > tamanhoMaxBytes && tentativas < 14){
+            if(qual > 0.4){
+              // primeiro tenta perder um pouco de qualidade
+              qual = Math.max(0.4, qual - 0.1);
+            } else if(lado > 360){
+              // depois de já ter reduzido bastante a qualidade, encolhe
+              // o tamanho da imagem e volta a qualidade a um nível razoável
+              lado = Math.round(lado * 0.85);
+              qual = Math.max(0.55, qualidade);
+            } else {
+              // já reduzimos o máximo razoável sem deixar a foto ilegível
+              break;
+            }
+            resultado = gerarDataUrl(lado, qual);
+            tentativas++;
+          }
+
+          resolve(resultado);
         };
         img.onerror = reject;
         img.src = e.target.result;
@@ -1461,9 +1656,18 @@ function iniciarAdmin(){
         if(dados){
           if(dados.fotoAbertura) configAtual.fotoAbertura = dados.fotoAbertura;
           if(Array.isArray(dados.mural) && dados.mural.length) configAtual.mural = dados.mural;
-          if(Array.isArray(dados.polaroids)) configAtual.polaroids = dados.polaroids;
           if(dados.dataDoReencontro) configAtual.dataDoReencontro = dados.dataDoReencontro;
           if(typeof dados.cartaTexto === 'string' && dados.cartaTexto.trim()) configAtual.cartaTexto = dados.cartaTexto;
+        }
+
+        // Migra polaroids antigas (se ainda estiverem em config/site) pra
+        // coleção própria "polaroids", e então carrega delas.
+        await fb.migrarPolaroidsSeNecessario();
+        try{
+          configAtual.polaroids = await fb.carregarPolaroidsUmaVez();
+        }catch(err){
+          console.warn('Não foi possível carregar as polaroids no admin:', err);
+          configAtual.polaroids = configAtual.polaroids || [];
         }
 
         preencherFormularios();
@@ -1732,13 +1936,14 @@ function iniciarAdmin(){
       });
     }
 
-    // ---------- Polaroids ----------
+    // ---------- Polaroids (coleção própria "polaroids": um documento por
+    // polaroid, com id, img, legenda e ordem) ----------
     function renderAdminPolaroids(){
       const lista = document.getElementById('adminPolaroidsLista');
       lista.innerHTML = '';
       (configAtual.polaroids||[]).forEach((p,i)=>{
-        const src = typeof p === 'string' ? p : (p.img||'');
-        const legenda = typeof p === 'string' ? '' : (p.legenda||'');
+        const src = p.img||'';
+        const legenda = p.legenda||'';
         const linha = document.createElement('div');
         linha.className = 'admin-polaroid-item';
         linha.innerHTML = `
@@ -1754,11 +1959,9 @@ function iniciarAdmin(){
         linha.querySelector('[data-acao="salvar-legenda"]').addEventListener('click', async ()=>{
           const novaLegenda = linha.querySelector('[data-campo="legenda"]').value;
           const atual = configAtual.polaroids[i];
-          configAtual.polaroids[i] = typeof atual === 'string'
-            ? { img: atual, legenda: novaLegenda }
-            : { ...atual, legenda: novaLegenda };
           try{
-            await fb.salvarConfig({ polaroids: configAtual.polaroids });
+            await fb.atualizarPolaroid(atual.id, { legenda: novaLegenda });
+            atual.legenda = novaLegenda;
             mostrarMsg('adminMsgPolaroids','Legenda salva! ✓');
           }catch(err){
             mostrarMsg('adminMsgPolaroids','Erro ao salvar: '+err.message, 5000);
@@ -1766,9 +1969,10 @@ function iniciarAdmin(){
         });
 
         linha.querySelector('[data-acao="remover"]').addEventListener('click', async ()=>{
-          configAtual.polaroids.splice(i,1);
+          const atual = configAtual.polaroids[i];
           try{
-            await fb.salvarConfig({ polaroids: configAtual.polaroids });
+            await fb.removerPolaroid(atual.id);
+            configAtual.polaroids.splice(i,1);
             mostrarMsg('adminMsgPolaroids','Polaroid removida.');
           }catch(err){
             mostrarMsg('adminMsgPolaroids','Erro ao remover: '+err.message, 5000);
@@ -1784,9 +1988,10 @@ function iniciarAdmin(){
       if(!arquivo){ mostrarMsg('adminMsgPolaroids','Escolha uma foto primeiro.'); return; }
       const base64 = await comprimirImagem(arquivo, 800, 0.7);
       configAtual.polaroids = configAtual.polaroids || [];
-      configAtual.polaroids.push({ img: base64, legenda: legenda });
+      const ordem = configAtual.polaroids.length;
       try{
-        await fb.salvarConfig({ polaroids: configAtual.polaroids });
+        const id = await fb.adicionarPolaroid({ img: base64, legenda: legenda, ordem: ordem });
+        configAtual.polaroids.push({ id, img: base64, legenda: legenda, ordem: ordem });
         mostrarMsg('adminMsgPolaroids','Polaroid adicionada! ✓');
         document.getElementById('adminNovaPolaroidArquivo').value = '';
         document.getElementById('adminNovaPolaroidLegenda').value = '';
