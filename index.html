@@ -953,7 +953,7 @@ const CONFIG = {
     { id:'slot2', icone:'📷', rotulo:'Foto', tachinha:'#ff7fa3', titulo:'Um clique nosso',
       tipo:'foto', fotoUrl:"https://images.unsplash.com/photo-1516589178581-6cd7833ae3b2?q=80&w=800&auto=format&fit=crop" },
     { id:'slot3', icone:'🎧', rotulo:'Música', tachinha:'#b892e8', titulo:'Nossa música',
-      tipo:'mp3', mp3Titulo:"Nossa música", mp3Url:"" },
+      tipo:'mp3', mp3Titulo:"Nossa música", mp3Url:"musica.mp3" },
     { id:'slot4', icone:'⌚', rotulo:'Tempo', tachinha:'#ffd166', titulo:'Sobre o tempo',
       tipo:'texto', texto:"Não importa quanto tempo passe, o que vivemos continua guardado aqui dentro. ⏳" },
     { id:'slot5', icone:'💌', rotulo:'Mensagem', tachinha:'#ff5d8f', titulo:'Uma mensagem',
@@ -1196,8 +1196,9 @@ function iniciarSite(){
         if(audio.paused){ audio.play(); playBtn.textContent='❚❚'; }
         else{ audio.pause(); playBtn.textContent='▶'; }
       });
-      // Se o cartão não tem um mp3Url (formato antigo do Storage), o áudio
-      // fica guardado em base64 num documento próprio no Firestore — busca aqui.
+      // Se o cartão não tem um mp3Url (nem link do repositório, nem base64
+      // do formato antigo), o áudio pode estar guardado em base64 num
+      // documento próprio no Firestore — busca aqui como último recurso.
       if(!item.mp3Url){
         if(fbSite && item.id){
           fbSite.carregarMp3(item.id).then((dataUrl)=>{
@@ -1751,6 +1752,10 @@ function iniciarAdmin(){
       configAtual.mural.forEach((item, i)=>{
         const bloco = document.createElement('div');
         bloco.className = 'admin-cartao-mural';
+        // Se o mp3Url já salvo não é um base64 (data:...), consideramos que
+        // é um caminho/link pro arquivo (ex: musica.mp3 no repositório) e
+        // pré-preenchemos o campo de texto com ele.
+        const mp3UrlAtualEhCaminho = item.mp3Url && !item.mp3Url.startsWith('data:');
         bloco.innerHTML = `
           <h3>Cartão ${i+1}</h3>
           <div class="admin-campo">
@@ -1788,8 +1793,12 @@ function iniciarAdmin(){
 
           <div class="admin-campos-tipo" data-tipo-campos="mp3">
             <div class="admin-campo"><label>Título da música</label><input type="text" data-campo="mp3Titulo" value="${item.mp3Titulo||''}"></div>
-            <div class="admin-campo"><label>Arquivo MP3</label><input type="file" accept="audio/*" data-campo-arquivo="mp3Url"></div>
-            <div class="admin-mp3-atual" data-mp3-atual style="${item.mp3Url?'':'display:none;'}">🎵 <span data-mp3-nome>${item.mp3Url?'arquivo já salvo':''}</span></div>
+            <div class="admin-campo">
+              <label>Caminho do arquivo no repositório (ex: musica.mp3)</label>
+              <input type="text" data-campo="mp3UrlTexto" value="${mp3UrlAtualEhCaminho ? item.mp3Url : ''}" placeholder="musica.mp3">
+            </div>
+            <div class="admin-campo"><label>Ou envie um arquivo (fica salvo no banco)</label><input type="file" accept="audio/*" data-campo-arquivo="mp3Url"></div>
+            <div class="admin-mp3-atual" data-mp3-atual style="${item.mp3Url && item.mp3Url.startsWith('data:') ? '' : 'display:none;'}">🎵 <span data-mp3-nome>${item.mp3Url && item.mp3Url.startsWith('data:') ? 'arquivo já salvo no banco' : ''}</span></div>
           </div>
 
           <div class="admin-campos-tipo" data-tipo-campos="link">
@@ -1910,6 +1919,11 @@ function iniciarAdmin(){
           novoItem.versCap = bloco.querySelector('[data-campo="versCap"]').value;
           novoItem.versVers = bloco.querySelector('[data-campo="versVers"]').value;
 
+          // Prioridade pro mp3: 1) arquivo novo enviado (vai pro Firestore em
+          // doc próprio), 2) caminho/link digitado (ex: musica.mp3 no
+          // repositório), 3) mantém o que já estava salvo.
+          const mp3UrlTexto = bloco.querySelector('[data-campo="mp3UrlTexto"]').value.trim();
+
           if(mp3Base64Temp){
             mostrarMsg('adminMsgMural', 'Salvando música, aguarde...', 20000);
             try{
@@ -1921,6 +1935,8 @@ function iniciarAdmin(){
               mostrarMsg('adminMsgMural','Erro ao salvar mp3: '+err.message, 5000);
               return;
             }
+          } else if(mp3UrlTexto){
+            novoItem.mp3Url = mp3UrlTexto;
           } else {
             novoItem.mp3Url = item.mp3Url || '';
           }
