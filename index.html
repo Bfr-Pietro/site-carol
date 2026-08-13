@@ -184,17 +184,7 @@ body.modo-admin #carregandoSite{ display:none !important; }
 }
 .btn-fofo:active{ transform:scale(.94); }
 
-/* ============ TELA 2 — PAINEL DE LEMBRANÇAS ============ */
-#tela2{
-  background:
-    radial-gradient(circle at 15% 20%, rgba(255,255,255,.6), transparent 40%),
-    repeating-linear-gradient(0deg, var(--creme) 0px, var(--creme) 27px, #f3e6d8 28px),
-    var(--bege);
-  justify-content:flex-start;
-  padding-top:44px;
-  overflow-y:auto;
-}
-.tela2-titulo{
+.titulo-tema{
   font-family:var(--font-titulo);
   font-weight:600;
   font-size:21px;
@@ -204,128 +194,182 @@ body.modo-admin #carregandoSite{ display:none !important; }
   display:inline-block;
   margin-bottom:26px;
 }
-.tela2-titulo::before{
+.titulo-tema::before{
   content:"";
   position:absolute; top:-13px; left:50%; transform:translateX(-50%) rotate(-3deg);
   width:56px; height:16px;
   background:rgba(255,217,230,.7);
   border-radius:2px;
 }
-.mural{
-  display:grid;
-  grid-template-columns:1fr 1fr;
-  gap:20px 14px;
-  max-width:400px;
-  width:100%;
-  padding-bottom:26px;
-}
-.cartao{
-  background:#fff;
-  border-radius:18px;
-  padding:20px 10px 16px;
-  box-shadow:var(--sombra-suave);
-  position:relative;
-  cursor:pointer;
-  transform:rotate(var(--rot));
-  animation:gentleFloat 6s ease-in-out infinite;
-  animation-delay:var(--delay,0s);
-  transition:transform .35s cubic-bezier(.34,1.56,.64,1), box-shadow .35s;
-}
-.cartao:active{ transform:scale(.94) rotate(var(--rot)); box-shadow:var(--sombra); }
-.cartao .tachinha{
-  position:absolute; top:-8px; left:50%; transform:translateX(-50%);
-  width:14px; height:14px; border-radius:50%;
-  box-shadow:0 3px 4px rgba(0,0,0,.25);
-}
-.cartao .icone{ font-size:36px; display:block; margin-bottom:8px; }
-.cartao .rotulo{ font-weight:600; font-size:13.5px; color:var(--texto); }
-.tela2-rodape{
-  font-size:12.5px;
-  color:var(--texto-suave);
-  font-style:italic;
-  margin-top:4px;
-  padding-bottom:20px;
-}
 
-/* Modal (usado nas telas 2 e 3) */
-.modal-overlay{
-  position:fixed; inset:0; z-index:900;
-  background:rgba(80,50,60,.35);
-  backdrop-filter:blur(6px);
-  display:flex; align-items:center; justify-content:center;
-  opacity:0; pointer-events:none;
-  transition:opacity .4s ease;
-  padding:24px;
+/* ============ TELA 2A — GIRASSOL ============ */
+:root{
+  --girassol-dourado:#e8a627;
+  --girassol-dourado-forte:#c9860f;
+  --girassol-verde:#7a9a3f;
+  --girassol-verde-escuro:#4f6b28;
+  --girassol-creme:#fffaea;
 }
-.modal-overlay.aberto{ opacity:1; pointer-events:auto; }
-/* Quando é um cartão de vídeo, o overlay quase não tem respiro nas laterais
-   — é isso que sobrava espaço mesmo com o modal mais largo. */
-.modal-overlay.video-modo{ padding:10px; }
-.modal-caixa{
-  background:#fff;
-  border-radius:22px;
-  max-width:340px; width:100%;
-  max-height:82vh;
+#telaGirassol{
+  background:
+    radial-gradient(circle at 18% 12%, rgba(255,255,255,.75), transparent 42%),
+    radial-gradient(circle at 85% 82%, rgba(122,154,63,.18), transparent 50%),
+    linear-gradient(165deg, #fff9e4 0%, #ffedb0 45%, #ffd97d 78%, #f5c24c 100%);
   overflow-y:auto;
-  padding:28px 24px;
-  box-shadow:0 20px 50px rgba(120,70,95,.3);
-  transform:scale(.85) translateY(20px);
-  transition:transform .4s cubic-bezier(.34,1.56,.64,1), max-width .35s ease, padding .35s ease;
+  padding-top:44px;
   position:relative;
+}
+#telaGirassol .titulo-tema{ color:var(--girassol-dourado-forte); }
+#telaGirassol .titulo-tema::before{ background:rgba(122,154,63,.22); }
+#decor-girassol{ position:absolute; inset:0; overflow:hidden; pointer-events:none; z-index:1; }
+.girassol-luz{
+  position:absolute; border-radius:50%; pointer-events:none;
+  background:radial-gradient(circle, rgba(255,244,200,.95), rgba(255,224,130,0) 70%);
+  animation:twinkle 3.2s ease-in-out infinite;
+}
+.girassol-folha{
+  position:absolute; top:-40px; pointer-events:none; user-select:none;
+  will-change:transform, opacity;
+  animation:folhaCair linear infinite;
+  filter:drop-shadow(0 2px 3px rgba(120,80,10,.18));
+}
+@keyframes folhaCair{
+  0%{ transform:translate(0,-10vh) rotate(0deg); opacity:0; }
+  8%{ opacity:.85; }
+  50%{ transform:translate(var(--sway,18px), 55vh) rotate(160deg); }
+  92%{ opacity:.8; }
+  100%{ transform:translate(0,120vh) rotate(320deg); opacity:0; }
+}
+.girassol-card{
+  position:relative; z-index:2;
+  background:linear-gradient(180deg, #fffdf5, var(--girassol-creme));
+  border-radius:22px; padding:28px 20px 24px;
+  box-shadow:0 14px 32px -10px rgba(180,120,10,.28);
+  border:1px solid rgba(232,166,39,.35);
   text-align:center;
+  max-width:400px; width:100%; margin-bottom:26px;
+  overflow:hidden;
 }
-.modal-overlay.aberto .modal-caixa{ transform:scale(1) translateY(0); }
-/* Cartões de vídeo: modal quase full-bleed e vídeo colado nas bordas do
-   modal (margem negativa cancela o padding lateral do modal-caixa), pra
-   usar praticamente 100% da largura útil da tela do celular. */
-.modal-caixa.modal-video-aberto{
-  max-width: min(97vw, 560px);
-  width:100%;
-  max-height:92vh;
-  padding: 18px 12px 20px;
+.girassol-card::before{
+  content:"🌻";
+  position:absolute; top:-18px; right:-14px; font-size:64px;
+  opacity:.14; transform:rotate(12deg);
 }
-.modal-caixa.modal-video-aberto h3{
-  font-size:16px;
-  margin:2px 0 10px;
+.girassol-card::after{
+  content:"";
+  position:absolute; left:0; right:0; bottom:0; height:5px;
+  background:linear-gradient(90deg, var(--girassol-verde), var(--girassol-dourado), var(--girassol-verde));
 }
-.modal-caixa.modal-video-aberto .modal-video-wrap,
-.modal-caixa.modal-video-aberto .modal-video{
-  margin:6px -12px 0;
-  width:calc(100% + 24px);
-  border-radius:0;
-}
-.modal-fechar{
-  position:absolute; top:12px; right:14px;
-  background:none; border:none; font-size:20px; color:var(--texto-suave); cursor:pointer;
-}
-.modal-caixa h3{ font-family:var(--font-titulo); color:var(--vermelho-detalhe); margin:4px 0 12px; font-size:18px;}
-.modal-caixa p{ line-height:1.65; font-size:14.5px; margin:0; }
-.modal-icone-grande{ font-size:48px; }
-.polaroid-modal-img{
-  width:100%; border:8px solid #fff; box-shadow:0 6px 18px rgba(0,0,0,.18); border-radius:2px; margin-top:6px;
-}
-.modal-video{ width:100%; border-radius:10px; margin-top:6px; box-shadow:0 6px 18px rgba(0,0,0,.18); background:#000; }
-.modal-video-wrap{
+.girassol-texto{ position:relative; font-size:15px; line-height:1.7; color:#5c4a1f; margin:0 0 18px; }
+.girassol-video-wrap{
   position:relative; width:100%; padding-top:56.25%;
-  border-radius:10px; overflow:hidden; margin-top:6px;
-  box-shadow:0 6px 18px rgba(0,0,0,.18); background:#000;
+  border-radius:14px; overflow:hidden; background:#000;
+  box-shadow:0 10px 26px -8px rgba(150,100,10,.35);
+  border:3px solid #fff;
 }
-.modal-video-wrap iframe{ position:absolute; inset:0; width:100%; height:100%; border:0; }
-.modal-link-btn{
-  display:inline-block; margin-top:10px; text-decoration:none;
-  background:var(--vermelho-detalhe); color:#fff; font-weight:700; font-size:14px;
-  padding:11px 24px; border-radius:30px; box-shadow:var(--sombra);
+.girassol-video-wrap iframe{ position:absolute; inset:0; width:100%; height:100%; border:0; }
+.girassol-video-vazio{ font-size:13px; color:var(--girassol-verde-escuro); font-style:italic; }
+
+/* ============ TELA 2B — VERSÍCULO ============ */
+:root{
+  --biblia-creme:#f8efdd;
+  --biblia-papel:#fffbf2;
+  --biblia-marrom:#6b4a2f;
+  --biblia-marrom-claro:#9a7350;
+  --biblia-dourado:#c79a44;
 }
-.modal-versiculo-ref{ margin-top:10px; font-size:13px; color:var(--texto-suave); font-style:italic; }
-.player{
+#telaVersiculo{
+  background:
+    radial-gradient(circle at 80% 8%, rgba(255,246,222,.9), transparent 45%),
+    linear-gradient(165deg, #ece0c8 0%, var(--biblia-creme) 45%, #f3e6cc 100%);
+  overflow-y:auto;
+  padding-top:44px;
+  position:relative;
+}
+#telaVersiculo .titulo-tema{ color:var(--biblia-marrom); }
+#telaVersiculo .titulo-tema::before{ background:rgba(199,154,68,.28); }
+#decor-versiculo{ position:absolute; inset:0; overflow:hidden; pointer-events:none; z-index:1; }
+.versiculo-luz{
+  position:absolute; border-radius:50%; pointer-events:none;
+  background:radial-gradient(circle, rgba(255,240,200,.8), rgba(255,240,200,0) 70%);
+  animation:twinkle 4s ease-in-out infinite;
+}
+.versiculo-marcador{
+  position:absolute; top:-6px; right:8%; width:26px; height:70px;
+  background:linear-gradient(180deg, var(--vermelho-detalhe), #c94a63);
+  clip-path:polygon(0 0,100% 0,100% 82%,50% 100%,0 82%);
+  box-shadow:0 6px 14px -4px rgba(0,0,0,.25);
+  z-index:3;
+}
+.versiculos-wrap{ position:relative; z-index:2; max-width:400px; width:100%; padding-bottom:26px; }
+.versiculo-card{
+  position:relative;
+  background:
+    repeating-linear-gradient(0deg, var(--biblia-papel) 0px, var(--biblia-papel) 27px, #f2e6cd 28px),
+    var(--biblia-papel);
+  border-radius:4px 14px 14px 4px;
+  padding:20px 18px 18px 22px; margin-bottom:16px;
+  box-shadow:0 10px 24px -8px rgba(107,74,47,.28);
+  border-left:4px solid var(--biblia-dourado);
+  text-align:left;
+}
+.versiculo-card::before{
+  content:"“";
+  position:absolute; top:-6px; left:10px; font-family:var(--font-carta);
+  font-size:46px; color:rgba(199,154,68,.4); line-height:1;
+}
+.versiculo-texto{ position:relative; font-family:var(--font-carta); font-size:19px; line-height:1.45; color:var(--biblia-marrom); margin:0 0 8px; padding-left:6px; }
+.versiculo-ref{ font-size:12.5px; color:var(--biblia-dourado); font-weight:700; text-align:right; margin:0; letter-spacing:.03em; }
+.versiculo-vazio{ font-size:13px; color:var(--biblia-marrom-claro); font-style:italic; }
+
+/* ============ TELA 2C — MÚSICA ============ */
+:root{
+  --tube-fundo:#2a0f18;
+  --tube-cartao:#3a1622;
+}
+#telaMusica{
+  background:linear-gradient(165deg, #3d1220 0%, #6b1c30 45%, var(--vermelho-detalhe) 130%);
+  overflow-y:auto;
+  padding-top:44px;
+}
+#telaMusica .titulo-tema{ color:#ffd9e6; }
+#telaMusica .titulo-tema::before{ background:rgba(255,255,255,.18); }
+.musica-wrap{ max-width:400px; width:100%; padding-bottom:26px; }
+.musica-player-wrap{
+  position:relative; width:100%; padding-top:56.25%; margin-bottom:18px;
+  border-radius:16px; overflow:hidden; background:#000;
+  box-shadow:0 16px 34px -10px rgba(0,0,0,.55);
+  display:none;
+  border:3px solid rgba(255,255,255,.15);
+}
+.musica-player-wrap.aberto{ display:block; animation:riseIn .5s cubic-bezier(.22,1,.36,1); }
+.musica-player-wrap iframe{ position:absolute; inset:0; width:100%; height:100%; border:0; }
+.playlist{ display:flex; flex-direction:column; gap:10px; }
+.playlist-titulo-mini{ font-size:11.5px; letter-spacing:.08em; text-transform:uppercase; color:rgba(255,255,255,.55); margin:0 0 10px; text-align:left; }
+.playlist-item{
   display:flex; align-items:center; gap:12px;
-  background:var(--rosa-claro); border-radius:14px; padding:12px 14px; margin-top:6px;
+  background:var(--tube-cartao); border-radius:14px; padding:8px; padding-right:14px;
+  box-shadow:0 6px 16px -6px rgba(0,0,0,.4); cursor:pointer; text-align:left;
+  transition:.25s; border:1px solid rgba(255,255,255,.06); width:100%; font-family:var(--font-corpo);
 }
-.player button{
-  width:40px; height:40px; border-radius:50%; border:none; background:var(--vermelho-detalhe); color:#fff; font-size:16px; cursor:pointer; flex:none;
+.playlist-item:hover{ background:#472030; }
+.playlist-item.ativa{ background:linear-gradient(90deg, rgba(255,217,230,.18), rgba(255,217,230,.06)); border-color:rgba(255,217,230,.4); }
+.playlist-item .thumb-wrap{
+  position:relative; flex:none; width:76px; height:52px; border-radius:9px; overflow:hidden;
+  background:linear-gradient(135deg,#5c2233,#7a2c40);
 }
-.player .info{ text-align:left; font-size:13px; overflow:hidden; }
-.player .info b{ display:block; font-size:13.5px; }
+.playlist-item .thumb-wrap img{ width:100%; height:100%; object-fit:cover; display:block; }
+.playlist-item .thumb-wrap .thumb-fallback{ width:100%; height:100%; display:flex; align-items:center; justify-content:center; font-size:18px; color:rgba(255,255,255,.55); }
+.playlist-item .play-icone{
+  position:absolute; inset:0; margin:auto; width:26px; height:26px; border-radius:50%; flex:none;
+  background:rgba(0,0,0,.45); color:#fff; backdrop-filter:blur(1px);
+  display:flex; align-items:center; justify-content:center; font-size:11px;
+  transition:.2s;
+}
+.playlist-item.ativa .play-icone{ background:var(--vermelho-detalhe); }
+.playlist-item .titulo{ font-weight:600; font-size:14px; color:#fff8fa; }
+.playlist-item .subt{ font-size:11.5px; color:rgba(255,255,255,.5); margin-top:2px; }
+.playlist-vazio{ font-size:13px; color:rgba(255,255,255,.6); font-style:italic; }
 
 /* ============ TELA 3 — ÁLBUM DE POLAROIDS ============ */
 #tela3{
@@ -624,6 +668,8 @@ body.modo-admin #adminPanel{ display:block; }
   <span data-idx="3"></span>
   <span data-idx="4"></span>
   <span data-idx="5"></span>
+  <span data-idx="6"></span>
+  <span data-idx="7"></span>
 </div>
 
 <div id="app">
@@ -640,12 +686,34 @@ body.modo-admin #adminPanel{ display:block; }
     </div>
   </section>
 
-  <!-- TELA 2 — PAINEL DE LEMBRANÇAS -->
-  <section class="screen" id="tela2">
-    <div class="tela2-titulo">Para você ♡</div>
-    <div class="mural" id="mural"></div>
-    <div class="tela2-rodape">Toque em uma lembrança para descobrir o que ela guarda.</div>
+  <!-- TELA 2A — GIRASSOL -->
+  <section class="screen" id="telaGirassol">
+    <div id="decor-girassol"></div>
+    <div class="titulo-tema">🌻 Girassol</div>
+    <div class="girassol-card">
+      <p class="girassol-texto" id="girassolTexto"></p>
+      <div class="girassol-video-wrap" id="girassolVideoWrap"></div>
+    </div>
   </section>
+
+  <!-- TELA 2B — VERSÍCULO -->
+  <section class="screen" id="telaVersiculo">
+    <div id="decor-versiculo"></div>
+    <div class="versiculo-marcador"></div>
+    <div class="titulo-tema">📖 Versículo</div>
+    <div class="versiculos-wrap" id="versiculosLista"></div>
+  </section>
+
+  <!-- TELA 2C — MÚSICA -->
+  <section class="screen" id="telaMusica">
+    <div class="titulo-tema">🎵 Música</div>
+    <div class="musica-wrap">
+      <div class="musica-player-wrap" id="musicaPlayerWrap"></div>
+      <p class="playlist-titulo-mini" id="playlistTituloMini" style="display:none;">nossa playlist</p>
+      <div class="playlist" id="playlistMusicas"></div>
+    </div>
+  </section>
+
 
   <!-- TELA 3 — ÁLBUM DE POLAROIDS -->
   <section class="screen" id="tela3">
@@ -700,14 +768,6 @@ body.modo-admin #adminPanel{ display:block; }
   </div>
 </div>
 
-<!-- MODAL genérico (tela 2) -->
-<div class="modal-overlay" id="modalOverlay">
-  <div class="modal-caixa" id="modalCaixa">
-    <button class="modal-fechar" id="modalFechar">✕</button>
-    <div id="modalConteudo"></div>
-  </div>
-</div>
-
 <!-- Camadas do álbum de polaroids (tela 3) -->
 <div id="album-blur"></div>
 <button id="voltar-polaroid">← Voltar</button>
@@ -757,10 +817,49 @@ body.modo-admin #adminPanel{ display:block; }
     </div>
 
     <div class="admin-secao">
-      <h2>Cartões do painel de lembranças</h2>
-      <p class="admin-desc">Escolha o tipo de conteúdo de cada um dos 6 cartões da segunda tela.</p>
-      <div id="adminMuralLista"></div>
-      <p class="admin-msg-ok" id="adminMsgMural"></p>
+      <h2>🌻 Aba Girassol</h2>
+      <p class="admin-desc">Texto que aparece no topo e o vídeo do YouTube exibido nessa aba.</p>
+      <div class="admin-campo">
+        <label>Texto</label>
+        <textarea id="adminGirassolTexto"></textarea>
+      </div>
+      <div class="admin-campo">
+        <label>Link do vídeo (YouTube)</label>
+        <input type="url" id="adminGirassolVideo" placeholder="Cole aqui o link do YouTube">
+      </div>
+      <div class="admin-video-preview" id="adminGirassolVideoPreview" style="display:none;"></div>
+      <div style="margin-top:10px;">
+        <button class="admin-btn" id="adminSalvarGirassol">Salvar aba Girassol</button>
+      </div>
+      <p class="admin-msg-ok" id="adminMsgGirassol"></p>
+    </div>
+
+    <div class="admin-secao">
+      <h2>📖 Aba Versículo</h2>
+      <p class="admin-desc">Adicione, edite ou remova quantos versículos quiser.</p>
+      <div id="adminVersiculosLista"></div>
+      <div class="admin-cartao-mural">
+        <h3>Adicionar novo versículo</h3>
+        <div class="admin-campo"><label>Texto do versículo</label><textarea id="adminNovoVersTexto"></textarea></div>
+        <div class="admin-campo"><label>Livro</label><input type="text" id="adminNovoVersLivro"></div>
+        <div class="admin-campo"><label>Capítulo</label><input type="text" id="adminNovoVersCap"></div>
+        <div class="admin-campo"><label>Versículo</label><input type="text" id="adminNovoVersVers"></div>
+        <button class="admin-btn" id="adminAdicionarVersiculo">Adicionar versículo</button>
+      </div>
+      <p class="admin-msg-ok" id="adminMsgVersiculos"></p>
+    </div>
+
+    <div class="admin-secao">
+      <h2>🎵 Aba Música</h2>
+      <p class="admin-desc">Adicione quantas músicas quiser através de links do YouTube. Elas aparecem como uma playlist.</p>
+      <div id="adminMusicasLista"></div>
+      <div class="admin-cartao-mural">
+        <h3>Adicionar nova música</h3>
+        <div class="admin-campo"><label>Título da música</label><input type="text" id="adminNovaMusicaTitulo"></div>
+        <div class="admin-campo"><label>Link do vídeo (YouTube)</label><input type="url" id="adminNovaMusicaUrl" placeholder="Cole aqui o link do YouTube"></div>
+        <button class="admin-btn" id="adminAdicionarMusica">Adicionar música</button>
+      </div>
+      <p class="admin-msg-ok" id="adminMsgMusicas"></p>
     </div>
 
     <div class="admin-secao">
@@ -832,6 +931,14 @@ const MP3_REF_COLECAO = "mp3";
 // imagem, legenda e ordem). Segue o mesmo padrão já usado pro mp3: assim
 // as polaroids não dividem documento com o resto do config/site.
 const POLAROIDS_COLECAO = "polaroids";
+// Documento próprio pra aba Girassol (texto + vídeo), fora de config/site,
+// pra que uma edição nessa aba nunca dependa nem afete as outras seções.
+const GIRASSOL_REF = doc(db, "girassol", "principal");
+// Coleções próprias pra versículos e músicas: um documento por item,
+// permitindo várias entradas em cada uma sem dividir documento entre si
+// nem com o config/site (mesmo padrão já usado pras polaroids).
+const VERSICULOS_COLECAO = "versiculos";
+const MUSICAS_COLECAO = "musicas";
 
 window.PedacinhoFirebase = {
   async carregarConfigUmaVez(){
@@ -931,6 +1038,156 @@ window.PedacinhoFirebase = {
     }catch(err){
       console.warn("Não foi possível migrar as polaroids:", err);
     }
+  },
+
+  // ---------- Girassol: documento próprio "girassol/principal" (campos:
+  // texto, videoUrl), separado de config/site.
+  async carregarGirassolUmaVez(){
+    try{
+      const snap = await getDoc(GIRASSOL_REF);
+      return snap.exists() ? snap.data() : null;
+    }catch(err){
+      console.warn("Não foi possível carregar o girassol:", err);
+      return null;
+    }
+  },
+  escutarGirassol(callback){
+    return onSnapshot(GIRASSOL_REF, (snap)=>{
+      if(snap.exists()) callback(snap.data());
+    }, (err)=>{
+      console.warn("Erro ao escutar o girassol:", err);
+    });
+  },
+  async salvarGirassol(dados){
+    await setDoc(GIRASSOL_REF, dados, { merge:true });
+  },
+  // Migração única: se config/site ainda tiver o campo antigo "girassol" e
+  // o documento próprio ainda não existir, copia o conteúdo pra lá e
+  // remove o campo de dentro do config/site.
+  async migrarGirassolSeNecessario(){
+    try{
+      const jaExiste = await getDoc(GIRASSOL_REF);
+      if(jaExiste.exists()) return;
+
+      const snap = await getDoc(CONFIG_REF);
+      const dados = snap.exists() ? snap.data() : null;
+      if(!dados || !dados.girassol) return;
+
+      await setDoc(GIRASSOL_REF, dados.girassol, { merge:true });
+      await setDoc(CONFIG_REF, { girassol: deleteField() }, { merge:true });
+    }catch(err){
+      console.warn("Não foi possível migrar o girassol:", err);
+    }
+  },
+
+  // ---------- Versículos: cada um é um documento próprio na coleção
+  // "versiculos" (campos: texto, livro, cap, vers, ordem), em vez de um
+  // array dentro de config/site — permite vários versículos sem que uma
+  // edição afete as outras seções.
+  async carregarVersiculosUmaVez(){
+    try{
+      const snap = await getDocs(query(collection(db, VERSICULOS_COLECAO), orderBy("ordem")));
+      return snap.docs.map(d=>({ id:d.id, ...d.data() }));
+    }catch(err){
+      console.warn("Não foi possível carregar os versículos:", err);
+      return [];
+    }
+  },
+  escutarVersiculos(callback){
+    return onSnapshot(query(collection(db, VERSICULOS_COLECAO), orderBy("ordem")), (snap)=>{
+      callback(snap.docs.map(d=>({ id:d.id, ...d.data() })));
+    }, (err)=>{
+      console.warn("Erro ao escutar os versículos:", err);
+    });
+  },
+  async adicionarVersiculo(dados){
+    const ref = await addDoc(collection(db, VERSICULOS_COLECAO), dados);
+    return ref.id;
+  },
+  async atualizarVersiculo(id, dados){
+    await updateDoc(doc(db, VERSICULOS_COLECAO, id), dados);
+  },
+  async removerVersiculo(id){
+    await deleteDoc(doc(db, VERSICULOS_COLECAO, id));
+  },
+  // Migração única: se config/site ainda tiver o array antigo "versiculos",
+  // cria um documento por versículo na coleção própria e remove o array
+  // de dentro do config/site. Não faz nada se a coleção já tiver dados.
+  async migrarVersiculosSeNecessario(){
+    try{
+      const snap = await getDoc(CONFIG_REF);
+      const dados = snap.exists() ? snap.data() : null;
+      if(!dados || !Array.isArray(dados.versiculos) || !dados.versiculos.length) return;
+
+      const existentes = await getDocs(collection(db, VERSICULOS_COLECAO));
+      if(!existentes.empty) return;
+
+      for(let i=0;i<dados.versiculos.length;i++){
+        const v = dados.versiculos[i];
+        await addDoc(collection(db, VERSICULOS_COLECAO), {
+          texto: v.texto||'', livro: v.livro||'', cap: v.cap||'', vers: v.vers||'', ordem:i
+        });
+      }
+
+      await setDoc(CONFIG_REF, { versiculos: deleteField() }, { merge:true });
+    }catch(err){
+      console.warn("Não foi possível migrar os versículos:", err);
+    }
+  },
+
+  // ---------- Músicas: cada uma é um documento próprio na coleção
+  // "musicas" (campos: titulo, videoUrl, ordem), em vez de um array
+  // dentro de config/site — permite várias músicas na playlist sem que
+  // uma edição afete as outras seções.
+  async carregarMusicasUmaVez(){
+    try{
+      const snap = await getDocs(query(collection(db, MUSICAS_COLECAO), orderBy("ordem")));
+      return snap.docs.map(d=>({ id:d.id, ...d.data() }));
+    }catch(err){
+      console.warn("Não foi possível carregar as músicas:", err);
+      return [];
+    }
+  },
+  escutarMusicas(callback){
+    return onSnapshot(query(collection(db, MUSICAS_COLECAO), orderBy("ordem")), (snap)=>{
+      callback(snap.docs.map(d=>({ id:d.id, ...d.data() })));
+    }, (err)=>{
+      console.warn("Erro ao escutar as músicas:", err);
+    });
+  },
+  async adicionarMusica(dados){
+    const ref = await addDoc(collection(db, MUSICAS_COLECAO), dados);
+    return ref.id;
+  },
+  async atualizarMusica(id, dados){
+    await updateDoc(doc(db, MUSICAS_COLECAO, id), dados);
+  },
+  async removerMusica(id){
+    await deleteDoc(doc(db, MUSICAS_COLECAO, id));
+  },
+  // Migração única: se config/site ainda tiver o array antigo "musicas",
+  // cria um documento por música na coleção própria e remove o array de
+  // dentro do config/site. Não faz nada se a coleção já tiver dados.
+  async migrarMusicasSeNecessario(){
+    try{
+      const snap = await getDoc(CONFIG_REF);
+      const dados = snap.exists() ? snap.data() : null;
+      if(!dados || !Array.isArray(dados.musicas) || !dados.musicas.length) return;
+
+      const existentes = await getDocs(collection(db, MUSICAS_COLECAO));
+      if(!existentes.empty) return;
+
+      for(let i=0;i<dados.musicas.length;i++){
+        const m = dados.musicas[i];
+        await addDoc(collection(db, MUSICAS_COLECAO), {
+          titulo: m.titulo||'', videoUrl: m.videoUrl||'', ordem:i
+        });
+      }
+
+      await setDoc(CONFIG_REF, { musicas: deleteField() }, { merge:true });
+    }catch(err){
+      console.warn("Não foi possível migrar as músicas:", err);
+    }
   }
 };
 
@@ -945,19 +1202,17 @@ window.dispatchEvent(new Event('firebase-pronto'));
 const CONFIG = {
   fotoAbertura: "https://images.unsplash.com/photo-1518199266791-5375a83190b7?q=80&w=1200&auto=format&fit=crop",
 
-  mural: [
-    { id:'slot0', icone:'🌻', rotulo:'Girassol', tachinha:'#ffb703', titulo:'Um pouquinho de sol',
-      tipo:'texto', texto:"Assim como o girassol se vira pra luz, eu me viro pra pensar em você. ☀️" },
-    { id:'slot1', icone:'📖', rotulo:'Versículo', tachinha:'#8ecae6', titulo:'Um versículo pra você',
-      tipo:'versiculo', versTexto:"O amor é paciente, o amor é bondoso...", versLivro:"1 Coríntios", versCap:"13", versVers:"4" },
-    { id:'slot2', icone:'📷', rotulo:'Foto', tachinha:'#ff7fa3', titulo:'Um clique nosso',
-      tipo:'foto', fotoUrl:"https://images.unsplash.com/photo-1516589178581-6cd7833ae3b2?q=80&w=800&auto=format&fit=crop" },
-    { id:'slot3', icone:'🎧', rotulo:'Música', tachinha:'#b892e8', titulo:'Nossa música',
-      tipo:'mp3', mp3Titulo:"Nossa música", mp3Url:"musica.mp3" },
-    { id:'slot4', icone:'⌚', rotulo:'Tempo', tachinha:'#ffd166', titulo:'Sobre o tempo',
-      tipo:'texto', texto:"Não importa quanto tempo passe, o que vivemos continua guardado aqui dentro. ⏳" },
-    { id:'slot5', icone:'💌', rotulo:'Mensagem', tachinha:'#ff5d8f', titulo:'Uma mensagem',
-      tipo:'texto', texto:"Só passando pra lembrar que você é um dos meus lugares favoritos. ♡" }
+  girassol: {
+    texto: "Assim como o girassol se vira pra luz, eu me viro pra pensar em você. ☀️",
+    videoUrl: ""
+  },
+
+  versiculos: [
+    { texto:"O amor é paciente, o amor é bondoso...", livro:"1 Coríntios", cap:"13", vers:"4" }
+  ],
+
+  musicas: [
+    { titulo:"Nossa música", videoUrl:"" }
   ],
 
   dataDoReencontro: "2026-12-24T18:00:00",
@@ -1007,7 +1262,7 @@ function obterEmbedVideo(url){
   // YouTube: watch?v=, youtu.be/, shorts/, embed/
   let m = url.match(/(?:youtube\.com\/(?:watch\?v=|shorts\/|embed\/)|youtu\.be\/)([a-zA-Z0-9_-]{6,})/i);
   if(m){
-    return { tipo:'youtube', embedUrl:`https://www.youtube.com/embed/${m[1]}` };
+    return { tipo:'youtube', id:m[1], embedUrl:`https://www.youtube.com/embed/${m[1]}`, thumbUrl:`https://img.youtube.com/vi/${m[1]}/hqdefault.jpg` };
   }
 
   // Google Drive: /file/d/ID/..., open?id=ID, uc?id=ID
@@ -1076,6 +1331,8 @@ function iniciarSite(){
         dots.forEach(d=>d.classList.remove('active'));
         dots[idx].classList.add('active');
         onTelaVisivel(idx);
+        // Pausa a música se o usuário sair da tela da música rolando pra outra.
+        if(e.target.id !== 'telaMusica') pararMusicaAtual();
       }
     });
   }, {threshold:.6, root: app});
@@ -1085,7 +1342,7 @@ function iniciarSite(){
   function onTelaVisivel(idx){
     if(telasJaAnimadas.has(idx)) return;
     telasJaAnimadas.add(idx);
-    if(idx===3) gerarEstrelas();
+    if(idx===5) gerarEstrelas();
   }
 
   // ---------- Partículas flutuantes tela 1 ----------
@@ -1127,101 +1384,155 @@ function iniciarSite(){
   // (usada pra buscar o mp3 sob demanda, direto do Firestore).
   let fbSite = null;
 
-  // ---------- TELA 2 — Mural de lembranças ----------
-  const mural = document.getElementById('mural');
-  function renderMural(){
-    mural.innerHTML = '';
-    CONFIG.mural.forEach((item,i)=>{
-      const rot = (Math.random()*6-3).toFixed(1)+'deg';
+  // ---------- TELAS 2A/2B/2C — Girassol / Versículo / Música ----------
+
+  // Girassol
+  function renderGirassol(){
+    document.getElementById('girassolTexto').textContent = (CONFIG.girassol && CONFIG.girassol.texto) || '';
+    const wrap = document.getElementById('girassolVideoWrap');
+    const embed = obterEmbedVideo(CONFIG.girassol && CONFIG.girassol.videoUrl);
+    if(!embed){
+      wrap.innerHTML = `<p class="girassol-video-vazio">Vídeo ainda não configurado.</p>`;
+      wrap.style.paddingTop = '0';
+    } else if(embed.tipo === 'youtube' || embed.tipo === 'drive'){
+      wrap.style.paddingTop = '56.25%';
+      wrap.innerHTML = `<iframe src="${embed.embedUrl}" allow="autoplay; encrypted-media; picture-in-picture" allowfullscreen loading="lazy"></iframe>`;
+    } else {
+      wrap.style.paddingTop = '0';
+      wrap.innerHTML = `<video style="width:100%;border-radius:14px;" src="${embed.embedUrl}" controls playsinline></video>`;
+    }
+  }
+
+  // ---------- Decoração animada: folhas/pétalas e luzes do Girassol ----------
+  function criarDecorGirassol(){
+    const container = document.getElementById('decor-girassol');
+    if(!container || container.dataset.pronto) return;
+    container.dataset.pronto = '1';
+    const folhas = ['🍃','🌿','🌾'];
+    const petalas = ['🌻'];
+    const qtdFolhas = 9;
+    for(let i=0;i<qtdFolhas;i++){
+      const el = document.createElement('span');
+      el.className = 'girassol-folha';
+      const usarPetala = i % 4 === 0;
+      el.textContent = usarPetala ? petalas[0] : folhas[Math.floor(Math.random()*folhas.length)];
+      el.style.left = (Math.random()*94)+'%';
+      el.style.fontSize = (usarPetala ? (11+Math.random()*6) : (13+Math.random()*9))+'px';
+      el.style.setProperty('--sway', (Math.random()*46-23)+'px');
+      el.style.animationDuration = (10+Math.random()*9)+'s';
+      el.style.animationDelay = (Math.random()*12)+'s';
+      container.appendChild(el);
+    }
+    const qtdLuzes = 10;
+    for(let i=0;i<qtdLuzes;i++){
+      const el = document.createElement('span');
+      el.className = 'girassol-luz';
+      const tam = 4+Math.random()*7;
+      el.style.width = tam+'px';
+      el.style.height = tam+'px';
+      el.style.left = (Math.random()*100)+'%';
+      el.style.top = (Math.random()*90)+'%';
+      el.style.animationDuration = (2.4+Math.random()*2.4)+'s';
+      el.style.animationDelay = (Math.random()*3)+'s';
+      container.appendChild(el);
+    }
+  }
+  criarDecorGirassol();
+
+  // ---------- Decoração animada: luz suave da tela do Versículo ----------
+  function criarDecorVersiculo(){
+    const container = document.getElementById('decor-versiculo');
+    if(!container || container.dataset.pronto) return;
+    container.dataset.pronto = '1';
+    const qtd = 8;
+    for(let i=0;i<qtd;i++){
+      const el = document.createElement('span');
+      el.className = 'versiculo-luz';
+      const tam = 5+Math.random()*9;
+      el.style.width = tam+'px';
+      el.style.height = tam+'px';
+      el.style.left = (Math.random()*100)+'%';
+      el.style.top = (Math.random()*92)+'%';
+      el.style.animationDuration = (3+Math.random()*3)+'s';
+      el.style.animationDelay = (Math.random()*4)+'s';
+      container.appendChild(el);
+    }
+  }
+  criarDecorVersiculo();
+
+  // Versículo (carregado da coleção própria "versiculos" do Firestore).
+  let versiculosAtuais = CONFIG.versiculos || [];
+  function renderVersiculos(){
+    const lista = document.getElementById('versiculosLista');
+    lista.innerHTML = '';
+    const versiculos = versiculosAtuais || [];
+    if(!versiculos.length){
+      lista.innerHTML = `<p class="versiculo-vazio">Nenhum versículo cadastrado ainda.</p>`;
+      return;
+    }
+    versiculos.forEach(v=>{
       const card = document.createElement('div');
-      card.className='cartao';
-      card.style.setProperty('--rot', rot);
-      card.style.setProperty('--delay', (i*0.3)+'s');
-      card.innerHTML = `<div class="tachinha" style="background:${item.tachinha||'#ff7fa3'}"></div>
-        <span class="icone">${item.icone||'💌'}</span>
-        <span class="rotulo">${item.rotulo||''}</span>`;
-      card.addEventListener('click', ()=>abrirModalMemoria(i));
-      mural.appendChild(card);
+      card.className = 'versiculo-card';
+      card.innerHTML = `<p class="versiculo-texto">${v.texto||''}</p>
+        <p class="versiculo-ref">${v.livro||''} ${v.cap||''}:${v.vers||''}</p>`;
+      lista.appendChild(card);
     });
   }
 
-  function abrirModalMemoria(i){
-    const item = CONFIG.mural[i];
-    if(!item) return;
-    const overlay = document.getElementById('modalOverlay');
-    const conteudo = document.getElementById('modalConteudo');
-    let html = `<h3>${item.titulo||item.rotulo||''}</h3>`;
-
-    if(item.tipo === 'foto'){
-      html += `<img class="polaroid-modal-img" src="${item.fotoUrl||''}" alt="foto">`;
-    } else if(item.tipo === 'mp3'){
-      html += `<div class="player">
-          <button id="playBtn" ${item.mp3Url?'':'disabled'}>${item.mp3Url?'▶':'…'}</button>
-          <div class="info"><b>${item.mp3Titulo||'Música'}</b><span>toque para ouvir</span></div>
-        </div>
-        <audio id="audioPlayer" src="${item.mp3Url||''}"></audio>`;
-    } else if(item.tipo === 'video'){
-      const embed = obterEmbedVideo(item.videoUrl);
-      if(!embed){
-        html += `<p>Vídeo ainda não configurado.</p>`;
-      } else if(embed.tipo === 'youtube' || embed.tipo === 'drive'){
-        html += `<div class="modal-video-wrap"><iframe src="${embed.embedUrl}" allow="autoplay; encrypted-media; picture-in-picture" allowfullscreen loading="lazy"></iframe></div>`;
-      } else {
-        html += `<video class="modal-video" src="${embed.embedUrl}" controls playsinline></video>`;
-      }
-    } else if(item.tipo === 'link'){
-      html += `<p>${item.linkDescricao||''}</p>
-        <a class="modal-link-btn" href="${item.linkUrl||'#'}" target="_blank" rel="noopener">${item.linkLabel||'Abrir link'}</a>`;
-    } else if(item.tipo === 'versiculo'){
-      html += `<p>“${item.versTexto||''}”</p>
-        <p class="modal-versiculo-ref">${item.versLivro||''} ${item.versCap||''}:${item.versVers||''}</p>`;
-    } else {
-      html += `<p>${item.texto||''}</p>`;
-    }
-
-    conteudo.innerHTML = html;
-    // Cartões de vídeo ganham um modal quase full-bleed (overlay com menos
-    // padding + vídeo colado nas bordas do modal) pra não ficar minúsculo
-    // na tela do celular (ver regras .video-modo / .modal-video-aberto no CSS).
-    const ehVideo = item.tipo === 'video';
-    document.getElementById('modalCaixa').classList.toggle('modal-video-aberto', ehVideo);
-    overlay.classList.toggle('video-modo', ehVideo);
-    overlay.classList.add('aberto');
-
-    if(item.tipo === 'mp3'){
-      const audio = document.getElementById('audioPlayer');
-      const playBtn = document.getElementById('playBtn');
-      playBtn.addEventListener('click', ()=>{
-        if(!audio.src){ return; }
-        if(audio.paused){ audio.play(); playBtn.textContent='❚❚'; }
-        else{ audio.pause(); playBtn.textContent='▶'; }
-      });
-      // Se o cartão não tem um mp3Url (nem link do repositório, nem base64
-      // do formato antigo), o áudio pode estar guardado em base64 num
-      // documento próprio no Firestore — busca aqui como último recurso.
-      if(!item.mp3Url){
-        if(fbSite && item.id){
-          fbSite.carregarMp3(item.id).then((dataUrl)=>{
-            if(!dataUrl){ playBtn.textContent='♡'; return; }
-            audio.src = dataUrl;
-            playBtn.disabled = false;
-            playBtn.textContent = '▶';
-          }).catch(()=>{ playBtn.textContent='♡'; });
-        } else {
-          playBtn.textContent = '♡';
-        }
-      }
-    }
+  // Música (carregada da coleção própria "musicas" do Firestore, como uma
+  // playlist estilo "YouTube romântico": miniatura, título e player embutido).
+  let musicasAtuais = CONFIG.musicas || [];
+  function pararMusicaAtual(){
+    const wrap = document.getElementById('musicaPlayerWrap');
+    wrap.classList.remove('aberto');
+    wrap.innerHTML = '';
   }
-  document.getElementById('modalFechar').addEventListener('click', fecharModal);
-  document.getElementById('modalOverlay').addEventListener('click', (e)=>{
-    if(e.target.id==='modalOverlay') fecharModal();
-  });
-  function fecharModal(){
-    document.getElementById('modalOverlay').classList.remove('aberto');
-    document.getElementById('modalOverlay').classList.remove('video-modo');
-    const audio = document.getElementById('audioPlayer');
-    if(audio) audio.pause();
+  function renderMusicas(){
+    const lista = document.getElementById('playlistMusicas');
+    const tituloMini = document.getElementById('playlistTituloMini');
+    lista.innerHTML = '';
+    pararMusicaAtual();
+    const musicas = musicasAtuais || [];
+    if(!musicas.length){
+      lista.innerHTML = `<p class="playlist-vazio">Nenhuma música cadastrada ainda.</p>`;
+      if(tituloMini) tituloMini.style.display = 'none';
+      return;
+    }
+    if(tituloMini) tituloMini.style.display = 'block';
+    musicas.forEach((m,i)=>{
+      const embed = obterEmbedVideo(m.videoUrl);
+      const thumb = (embed && embed.tipo==='youtube') ? embed.thumbUrl : '';
+      const item = document.createElement('button');
+      item.className = 'playlist-item';
+      item.innerHTML = `
+        <span class="thumb-wrap">
+          ${thumb ? `<img src="${thumb}" alt="" loading="lazy">` : `<span class="thumb-fallback">🎵</span>`}
+          <span class="play-icone">▶</span>
+        </span>
+        <span>
+          <span class="titulo">${m.titulo||'Música'}</span>
+          <div class="subt">toque para ouvir</div>
+        </span>`;
+      item.addEventListener('click', ()=>tocarMusica(i, item));
+      lista.appendChild(item);
+    });
+  }
+  function tocarMusica(i, itemEl){
+    const musicas = musicasAtuais || [];
+    const m = musicas[i];
+    if(!m) return;
+    [...document.querySelectorAll('.playlist-item')].forEach(el=>el.classList.remove('ativa'));
+    itemEl.classList.add('ativa');
+    const wrap = document.getElementById('musicaPlayerWrap');
+    const embed = obterEmbedVideo(m.videoUrl);
+    if(!embed || embed.tipo !== 'youtube'){
+      wrap.classList.remove('aberto');
+      wrap.innerHTML = '';
+      return;
+    }
+    wrap.innerHTML = `<iframe src="${embed.embedUrl}?autoplay=1" allow="autoplay; encrypted-media; picture-in-picture" allowfullscreen loading="lazy"></iframe>`;
+    wrap.classList.add('aberto');
+    wrap.scrollIntoView({behavior:'smooth', block:'nearest'});
   }
 
   // ---------- TELA 3 — Álbum de Polaroids ----------
@@ -1471,7 +1782,9 @@ function iniciarSite(){
   // feitas na aba administrativa aparecerem na hora).
   function aplicarConfigCompleta(){
     aplicarFotoAbertura();
-    renderMural();
+    renderGirassol();
+    renderVersiculos();
+    renderMusicas();
     renderPolaroids();
     iniciarContador();
     renderCartaTexto();
@@ -1488,7 +1801,6 @@ function iniciarSite(){
   function mesclarDadosNoConfig(dados){
     if(!dados) return;
     if(dados.fotoAbertura) CONFIG.fotoAbertura = dados.fotoAbertura;
-    if(Array.isArray(dados.mural) && dados.mural.length) CONFIG.mural = dados.mural;
     if(dados.dataDoReencontro) CONFIG.dataDoReencontro = dados.dataDoReencontro;
     if(typeof dados.cartaTexto === 'string' && dados.cartaTexto.trim()) CONFIG.cartaTexto = dados.cartaTexto;
   }
@@ -1516,6 +1828,24 @@ function iniciarSite(){
       console.warn('Não foi possível carregar o config inicial:', err);
     }
     try{
+      const girassol = await fb.carregarGirassolUmaVez();
+      if(girassol) CONFIG.girassol = girassol;
+    }catch(err){
+      console.warn('Não foi possível carregar o girassol inicial:', err);
+    }
+    try{
+      const vers = await fb.carregarVersiculosUmaVez();
+      if(vers && vers.length) versiculosAtuais = vers;
+    }catch(err){
+      console.warn('Não foi possível carregar os versículos iniciais:', err);
+    }
+    try{
+      const musicas = await fb.carregarMusicasUmaVez();
+      if(musicas && musicas.length) musicasAtuais = musicas;
+    }catch(err){
+      console.warn('Não foi possível carregar as músicas iniciais:', err);
+    }
+    try{
       const pols = await fb.carregarPolaroidsUmaVez();
       if(pols && pols.length) polaroidsAtuais = pols;
     }catch(err){
@@ -1528,9 +1858,22 @@ function iniciarSite(){
     // aqui em tempo real e atualiza só a parte que mudou.
     fb.escutarConfig((dados)=>{
       if(dados.fotoAbertura){ CONFIG.fotoAbertura = dados.fotoAbertura; aplicarFotoAbertura(); }
-      if(Array.isArray(dados.mural) && dados.mural.length){ CONFIG.mural = dados.mural; renderMural(); }
       if(dados.dataDoReencontro){ CONFIG.dataDoReencontro = dados.dataDoReencontro; iniciarContador(); }
       if(typeof dados.cartaTexto === 'string' && dados.cartaTexto.trim()){ CONFIG.cartaTexto = dados.cartaTexto; renderCartaTexto(); }
+    });
+
+    fb.escutarGirassol((girassol)=>{
+      if(girassol){ CONFIG.girassol = girassol; renderGirassol(); }
+    });
+
+    fb.escutarVersiculos((vers)=>{
+      versiculosAtuais = vers;
+      renderVersiculos();
+    });
+
+    fb.escutarMusicas((musicas)=>{
+      musicasAtuais = musicas;
+      renderMusicas();
     });
 
     fb.escutarPolaroids((pols)=>{
@@ -1547,7 +1890,6 @@ function iniciarAdmin(){
   if(adminJaIniciado) return;
   adminJaIniciado = true;
 
-  const TIPOS_MURAL = ['texto','foto','mp3','link','video','versiculo'];
   let configAtual = JSON.parse(JSON.stringify(CONFIG)); // cópia local pra edição
   let fotoAberturaBase64Temp = null;
 
@@ -1656,19 +1998,41 @@ function iniciarAdmin(){
         const dados = await fb.carregarConfigUmaVez();
         if(dados){
           if(dados.fotoAbertura) configAtual.fotoAbertura = dados.fotoAbertura;
-          if(Array.isArray(dados.mural) && dados.mural.length) configAtual.mural = dados.mural;
           if(dados.dataDoReencontro) configAtual.dataDoReencontro = dados.dataDoReencontro;
           if(typeof dados.cartaTexto === 'string' && dados.cartaTexto.trim()) configAtual.cartaTexto = dados.cartaTexto;
         }
 
-        // Migra polaroids antigas (se ainda estiverem em config/site) pra
-        // coleção própria "polaroids", e então carrega delas.
+        // Migra dados antigos que ainda estejam dentro de config/site pras
+        // suas próprias estruturas (documento/coleção separados), e então
+        // carrega o conteúdo já a partir do lugar novo.
         await fb.migrarPolaroidsSeNecessario();
+        await fb.migrarGirassolSeNecessario();
+        await fb.migrarVersiculosSeNecessario();
+        await fb.migrarMusicasSeNecessario();
+
         try{
           configAtual.polaroids = await fb.carregarPolaroidsUmaVez();
         }catch(err){
           console.warn('Não foi possível carregar as polaroids no admin:', err);
           configAtual.polaroids = configAtual.polaroids || [];
+        }
+        try{
+          const girassol = await fb.carregarGirassolUmaVez();
+          if(girassol) configAtual.girassol = girassol;
+        }catch(err){
+          console.warn('Não foi possível carregar o girassol no admin:', err);
+        }
+        try{
+          configAtual.versiculos = await fb.carregarVersiculosUmaVez();
+        }catch(err){
+          console.warn('Não foi possível carregar os versículos no admin:', err);
+          configAtual.versiculos = configAtual.versiculos || [];
+        }
+        try{
+          configAtual.musicas = await fb.carregarMusicasUmaVez();
+        }catch(err){
+          console.warn('Não foi possível carregar as músicas no admin:', err);
+          configAtual.musicas = configAtual.musicas || [];
         }
 
         preencherFormularios();
@@ -1707,8 +2071,14 @@ function iniciarAdmin(){
         }
       });
 
-      // Cartões do mural
-      renderAdminMural();
+      // Aba Girassol
+      renderAdminGirassol();
+
+      // Aba Versículo
+      renderAdminVersiculos();
+
+      // Aba Música
+      renderAdminMusicas();
 
       // Polaroids
       renderAdminPolaroids();
@@ -1745,212 +2115,199 @@ function iniciarAdmin(){
       });
     }
 
-    // ---------- Cartões do mural ----------
-    function renderAdminMural(){
-      const lista = document.getElementById('adminMuralLista');
+    // ---------- Aba Girassol ----------
+    function renderAdminGirassol(){
+      configAtual.girassol = configAtual.girassol || { texto:'', videoUrl:'' };
+      const textoInput = document.getElementById('adminGirassolTexto');
+      const videoInput = document.getElementById('adminGirassolVideo');
+      const preview = document.getElementById('adminGirassolVideoPreview');
+      textoInput.value = configAtual.girassol.texto || '';
+      videoInput.value = configAtual.girassol.videoUrl || '';
+
+      function atualizarPreview(){
+        const embed = obterEmbedVideo(videoInput.value);
+        if(!embed){
+          preview.style.display = 'none';
+          preview.innerHTML = '';
+          return;
+        }
+        preview.style.display = 'block';
+        if(embed.tipo === 'youtube' || embed.tipo === 'drive'){
+          preview.innerHTML = `<iframe src="${embed.embedUrl}" allow="autoplay; encrypted-media; picture-in-picture" allowfullscreen loading="lazy"></iframe>`;
+        } else {
+          preview.innerHTML = `<video src="${embed.embedUrl}" controls playsinline></video>`;
+        }
+      }
+      atualizarPreview();
+      videoInput.addEventListener('change', atualizarPreview);
+      videoInput.addEventListener('blur', atualizarPreview);
+
+      document.getElementById('adminSalvarGirassol').addEventListener('click', async ()=>{
+        const novoGirassol = { texto: textoInput.value, videoUrl: videoInput.value };
+        try{
+          await fb.salvarGirassol(novoGirassol);
+          configAtual.girassol = novoGirassol;
+          mostrarMsg('adminMsgGirassol', 'Aba Girassol salva! ✓');
+        }catch(err){
+          mostrarMsg('adminMsgGirassol','Erro ao salvar: '+err.message, 5000);
+        }
+      });
+    }
+
+    // ---------- Aba Versículo ----------
+    function renderAdminVersiculos(){
+      configAtual.versiculos = configAtual.versiculos || [];
+      const lista = document.getElementById('adminVersiculosLista');
       lista.innerHTML = '';
-      configAtual.mural.forEach((item, i)=>{
+      configAtual.versiculos.forEach((v,i)=>{
         const bloco = document.createElement('div');
         bloco.className = 'admin-cartao-mural';
-        // Se o mp3Url já salvo não é um base64 (data:...), consideramos que
-        // é um caminho/link pro arquivo (ex: musica.mp3 no repositório) e
-        // pré-preenchemos o campo de texto com ele.
-        const mp3UrlAtualEhCaminho = item.mp3Url && !item.mp3Url.startsWith('data:');
         bloco.innerHTML = `
-          <h3>Cartão ${i+1}</h3>
-          <div class="admin-campo">
-            <label>Ícone (emoji)</label>
-            <input type="text" data-campo="icone" value="${item.icone||''}">
-          </div>
-          <div class="admin-campo">
-            <label>Rótulo (texto pequeno no cartão)</label>
-            <input type="text" data-campo="rotulo" value="${item.rotulo||''}">
-          </div>
-          <div class="admin-campo">
-            <label>Título (ao abrir)</label>
-            <input type="text" data-campo="titulo" value="${item.titulo||''}">
-          </div>
-          <div class="admin-campo">
-            <label>Tipo de conteúdo</label>
-            <select data-campo="tipo">
-              <option value="texto">Texto</option>
-              <option value="foto">Foto</option>
-              <option value="mp3">MP3 (link)</option>
-              <option value="link">Link</option>
-              <option value="video">Vídeo (link)</option>
-              <option value="versiculo">Versículo</option>
-            </select>
-          </div>
-
-          <div class="admin-campos-tipo" data-tipo-campos="texto">
-            <div class="admin-campo"><label>Texto</label><textarea data-campo="texto">${item.texto||''}</textarea></div>
-          </div>
-
-          <div class="admin-campos-tipo" data-tipo-campos="foto">
-            <div class="admin-campo"><label>Foto</label><input type="file" accept="image/*" data-campo-arquivo="fotoUrl"></div>
-            <img class="admin-preview-img" data-preview="fotoUrl" src="${item.fotoUrl||''}" style="${item.fotoUrl?'':'display:none;'}">
-          </div>
-
-          <div class="admin-campos-tipo" data-tipo-campos="mp3">
-            <div class="admin-campo"><label>Título da música</label><input type="text" data-campo="mp3Titulo" value="${item.mp3Titulo||''}"></div>
-            <div class="admin-campo">
-              <label>Caminho do arquivo no repositório (ex: musica.mp3)</label>
-              <input type="text" data-campo="mp3UrlTexto" value="${mp3UrlAtualEhCaminho ? item.mp3Url : ''}" placeholder="musica.mp3">
-            </div>
-            <div class="admin-campo"><label>Ou envie um arquivo (fica salvo no banco)</label><input type="file" accept="audio/*" data-campo-arquivo="mp3Url"></div>
-            <div class="admin-mp3-atual" data-mp3-atual style="${item.mp3Url && item.mp3Url.startsWith('data:') ? '' : 'display:none;'}">🎵 <span data-mp3-nome>${item.mp3Url && item.mp3Url.startsWith('data:') ? 'arquivo já salvo no banco' : ''}</span></div>
-          </div>
-
-          <div class="admin-campos-tipo" data-tipo-campos="link">
-            <div class="admin-campo"><label>Descrição</label><textarea data-campo="linkDescricao">${item.linkDescricao||''}</textarea></div>
-            <div class="admin-campo"><label>Texto do botão</label><input type="text" data-campo="linkLabel" value="${item.linkLabel||''}" placeholder="Abrir link"></div>
-            <div class="admin-campo"><label>URL</label><input type="url" data-campo="linkUrl" value="${item.linkUrl||''}" placeholder="https://..."></div>
-          </div>
-
-          <div class="admin-campos-tipo" data-tipo-campos="video">
-            <div class="admin-campo">
-              <label>Link do vídeo (YouTube, Google Drive ou link direto)</label>
-              <input type="url" data-campo="videoUrl" value="${item.videoUrl||''}" placeholder="Cole aqui o link do YouTube ou do Google Drive">
-            </div>
-            <div class="admin-video-preview" data-video-preview style="${item.videoUrl?'':'display:none;'}"></div>
-          </div>
-
-          <div class="admin-campos-tipo" data-tipo-campos="versiculo">
-            <div class="admin-campo"><label>Texto do versículo</label><textarea data-campo="versTexto">${item.versTexto||''}</textarea></div>
-            <div class="admin-campo"><label>Livro</label><input type="text" data-campo="versLivro" value="${item.versLivro||''}"></div>
-            <div class="admin-campo"><label>Capítulo</label><input type="text" data-campo="versCap" value="${item.versCap||''}"></div>
-            <div class="admin-campo"><label>Versículo</label><input type="text" data-campo="versVers" value="${item.versVers||''}"></div>
-          </div>
-
-          <div style="margin-top:10px;">
-            <button class="admin-btn" data-acao="salvar-cartao">Salvar cartão ${i+1}</button>
+          <h3>Versículo ${i+1}</h3>
+          <div class="admin-campo"><label>Texto do versículo</label><textarea data-campo="texto">${v.texto||''}</textarea></div>
+          <div class="admin-campo"><label>Livro</label><input type="text" data-campo="livro" value="${v.livro||''}"></div>
+          <div class="admin-campo"><label>Capítulo</label><input type="text" data-campo="cap" value="${v.cap||''}"></div>
+          <div class="admin-campo"><label>Versículo</label><input type="text" data-campo="vers" value="${v.vers||''}"></div>
+          <div style="margin-top:10px; display:flex; gap:10px;">
+            <button class="admin-btn" data-acao="salvar">Salvar</button>
+            <button class="admin-btn perigo" data-acao="remover">Remover</button>
           </div>
         `;
         lista.appendChild(bloco);
 
-        const selectTipo = bloco.querySelector('[data-campo="tipo"]');
-        selectTipo.value = item.tipo || 'texto';
-
-        function atualizarVisibilidadeTipo(){
-          TIPOS_MURAL.forEach(t=>{
-            const grupo = bloco.querySelector(`[data-tipo-campos="${t}"]`);
-            if(grupo) grupo.classList.toggle('ativo', t === selectTipo.value);
-          });
-        }
-        atualizarVisibilidadeTipo();
-        selectTipo.addEventListener('change', atualizarVisibilidadeTipo);
-
-        const inputVideoCartao = bloco.querySelector('[data-campo="videoUrl"]');
-        const previewVideoCartao = bloco.querySelector('[data-video-preview]');
-        function atualizarPreviewVideo(){
-          const embed = obterEmbedVideo(inputVideoCartao.value);
-          if(!embed){
-            previewVideoCartao.style.display = 'none';
-            previewVideoCartao.innerHTML = '';
-            return;
-          }
-          previewVideoCartao.style.display = 'block';
-          if(embed.tipo === 'youtube' || embed.tipo === 'drive'){
-            previewVideoCartao.innerHTML = `<iframe src="${embed.embedUrl}" allow="autoplay; encrypted-media; picture-in-picture" allowfullscreen loading="lazy"></iframe>`;
-          } else {
-            previewVideoCartao.innerHTML = `<video src="${embed.embedUrl}" controls playsinline></video>`;
-          }
-        }
-        if(inputVideoCartao){
-          atualizarPreviewVideo();
-          inputVideoCartao.addEventListener('change', atualizarPreviewVideo);
-          inputVideoCartao.addEventListener('blur', atualizarPreviewVideo);
-        }
-
-        const inputMp3Cartao = bloco.querySelector('[data-campo-arquivo="mp3Url"]');
-        let mp3Base64Temp = null;
-        // Limite prático pra caber tranquilo num documento do Firestore
-        // (que tem teto de 1MB). Base64 deixa o arquivo ~33% maior.
-        const MP3_TAMANHO_MAX = 700 * 1024; // 700KB no arquivo original
-        if(inputMp3Cartao){
-          inputMp3Cartao.addEventListener('change', (e)=>{
-            const file = e.target.files[0];
-            if(!file) return;
-            const linha = bloco.querySelector('[data-mp3-atual]');
-            const nomeEl = bloco.querySelector('[data-mp3-nome]');
-            if(file.size > MP3_TAMANHO_MAX){
-              mostrarMsg('adminMsgMural', `Esse mp3 tem ${(file.size/1024/1024).toFixed(1)}MB — use um trecho de até ~700KB (o Firestore tem limite de 1MB por documento).`, 8000);
-              inputMp3Cartao.value = '';
-              return;
-            }
-            const leitor = new FileReader();
-            leitor.onload = (ev)=>{
-              mp3Base64Temp = ev.target.result;
-              if(nomeEl) nomeEl.textContent = file.name;
-              if(linha) linha.style.display = 'block';
-            };
-            leitor.readAsDataURL(file);
-          });
-        }
-
-        const inputFotoCartao = bloco.querySelector('[data-campo-arquivo="fotoUrl"]');
-        let fotoCartaoBase64Temp = null;
-        if(inputFotoCartao){
-          inputFotoCartao.addEventListener('change', async (e)=>{
-            const file = e.target.files[0];
-            if(!file) return;
-            const base64 = await comprimirImagem(file, 900, 0.72);
-            fotoCartaoBase64Temp = base64;
-            const prev = bloco.querySelector('[data-preview="fotoUrl"]');
-            prev.src = base64; prev.style.display = 'block';
-          });
-        }
-
-        bloco.querySelector('[data-acao="salvar-cartao"]').addEventListener('click', async ()=>{
-          const novoItem = { ...item };
-          novoItem.icone = bloco.querySelector('[data-campo="icone"]').value;
-          novoItem.rotulo = bloco.querySelector('[data-campo="rotulo"]').value;
-          novoItem.titulo = bloco.querySelector('[data-campo="titulo"]').value;
-          novoItem.tipo = selectTipo.value;
-          novoItem.texto = bloco.querySelector('[data-campo="texto"]').value;
-          novoItem.fotoUrl = fotoCartaoBase64Temp || item.fotoUrl || '';
-          novoItem.mp3Titulo = bloco.querySelector('[data-campo="mp3Titulo"]').value;
-          novoItem.linkDescricao = bloco.querySelector('[data-campo="linkDescricao"]').value;
-          novoItem.linkLabel = bloco.querySelector('[data-campo="linkLabel"]').value;
-          novoItem.linkUrl = bloco.querySelector('[data-campo="linkUrl"]').value;
-          novoItem.videoUrl = bloco.querySelector('[data-campo="videoUrl"]').value;
-          novoItem.versTexto = bloco.querySelector('[data-campo="versTexto"]').value;
-          novoItem.versLivro = bloco.querySelector('[data-campo="versLivro"]').value;
-          novoItem.versCap = bloco.querySelector('[data-campo="versCap"]').value;
-          novoItem.versVers = bloco.querySelector('[data-campo="versVers"]').value;
-
-          // Prioridade pro mp3: 1) arquivo novo enviado (vai pro Firestore em
-          // doc próprio), 2) caminho/link digitado (ex: musica.mp3 no
-          // repositório), 3) mantém o que já estava salvo.
-          const mp3UrlTexto = bloco.querySelector('[data-campo="mp3UrlTexto"]').value.trim();
-
-          if(mp3Base64Temp){
-            mostrarMsg('adminMsgMural', 'Salvando música, aguarde...', 20000);
-            try{
-              await fb.salvarMp3(novoItem.id, mp3Base64Temp);
-              // mp3Url fica vazio de propósito: o site busca o áudio no
-              // documento separado (coleção "mp3") pelo id do cartão.
-              novoItem.mp3Url = '';
-            }catch(err){
-              mostrarMsg('adminMsgMural','Erro ao salvar mp3: '+err.message, 5000);
-              return;
-            }
-          } else if(mp3UrlTexto){
-            novoItem.mp3Url = mp3UrlTexto;
-          } else {
-            novoItem.mp3Url = item.mp3Url || '';
-          }
-
-          configAtual.mural[i] = novoItem;
+        bloco.querySelector('[data-acao="salvar"]').addEventListener('click', async ()=>{
+          const novoV = {
+            texto: bloco.querySelector('[data-campo="texto"]').value,
+            livro: bloco.querySelector('[data-campo="livro"]').value,
+            cap: bloco.querySelector('[data-campo="cap"]').value,
+            vers: bloco.querySelector('[data-campo="vers"]').value
+          };
           try{
-            await fb.salvarConfig({ mural: configAtual.mural });
-            mostrarMsg('adminMsgMural', `Cartão ${i+1} salvo! ✓`);
+            await fb.atualizarVersiculo(v.id, novoV);
+            configAtual.versiculos[i] = { ...v, ...novoV };
+            mostrarMsg('adminMsgVersiculos', `Versículo ${i+1} salvo! ✓`);
           }catch(err){
-            mostrarMsg('adminMsgMural','Erro ao salvar: '+err.message, 5000);
+            mostrarMsg('adminMsgVersiculos','Erro ao salvar: '+err.message, 5000);
           }
+        });
+
+        bloco.querySelector('[data-acao="remover"]').addEventListener('click', async ()=>{
+          try{
+            await fb.removerVersiculo(v.id);
+            configAtual.versiculos.splice(i,1);
+            mostrarMsg('adminMsgVersiculos', 'Versículo removido.');
+          }catch(err){
+            mostrarMsg('adminMsgVersiculos','Erro ao remover: '+err.message, 5000);
+          }
+          renderAdminVersiculos();
         });
       });
     }
+
+    document.getElementById('adminAdicionarVersiculo').addEventListener('click', async ()=>{
+      const texto = document.getElementById('adminNovoVersTexto').value;
+      const livro = document.getElementById('adminNovoVersLivro').value;
+      const cap = document.getElementById('adminNovoVersCap').value;
+      const vers = document.getElementById('adminNovoVersVers').value;
+      if(!texto.trim()){ mostrarMsg('adminMsgVersiculos','Escreva o texto do versículo primeiro.'); return; }
+      configAtual.versiculos = configAtual.versiculos || [];
+      const ordem = configAtual.versiculos.length;
+      const novoV = { texto, livro, cap, vers, ordem };
+      try{
+        const id = await fb.adicionarVersiculo(novoV);
+        configAtual.versiculos.push({ id, ...novoV });
+        mostrarMsg('adminMsgVersiculos', 'Versículo adicionado! ✓');
+        document.getElementById('adminNovoVersTexto').value = '';
+        document.getElementById('adminNovoVersLivro').value = '';
+        document.getElementById('adminNovoVersCap').value = '';
+        document.getElementById('adminNovoVersVers').value = '';
+        renderAdminVersiculos();
+      }catch(err){
+        mostrarMsg('adminMsgVersiculos','Erro ao adicionar: '+err.message, 5000);
+      }
+    });
+
+    // ---------- Aba Música ----------
+    function renderAdminMusicas(){
+      configAtual.musicas = configAtual.musicas || [];
+      const lista = document.getElementById('adminMusicasLista');
+      lista.innerHTML = '';
+      configAtual.musicas.forEach((m,i)=>{
+        const bloco = document.createElement('div');
+        bloco.className = 'admin-cartao-mural';
+        bloco.innerHTML = `
+          <h3>Música ${i+1}</h3>
+          <div class="admin-campo"><label>Título da música</label><input type="text" data-campo="titulo" value="${m.titulo||''}"></div>
+          <div class="admin-campo"><label>Link do vídeo (YouTube)</label><input type="url" data-campo="videoUrl" value="${m.videoUrl||''}" placeholder="Cole aqui o link do YouTube"></div>
+          <div class="admin-video-preview" data-video-preview style="${m.videoUrl?'':'display:none;'}"></div>
+          <div style="margin-top:10px; display:flex; gap:10px;">
+            <button class="admin-btn" data-acao="salvar">Salvar</button>
+            <button class="admin-btn perigo" data-acao="remover">Remover</button>
+          </div>
+        `;
+        lista.appendChild(bloco);
+
+        const inputVideo = bloco.querySelector('[data-campo="videoUrl"]');
+        const preview = bloco.querySelector('[data-video-preview]');
+        function atualizarPreview(){
+          const embed = obterEmbedVideo(inputVideo.value);
+          if(!embed){
+            preview.style.display = 'none';
+            preview.innerHTML = '';
+            return;
+          }
+          preview.style.display = 'block';
+          preview.innerHTML = `<iframe src="${embed.embedUrl}" allow="autoplay; encrypted-media; picture-in-picture" allowfullscreen loading="lazy"></iframe>`;
+        }
+        atualizarPreview();
+        inputVideo.addEventListener('change', atualizarPreview);
+        inputVideo.addEventListener('blur', atualizarPreview);
+
+        bloco.querySelector('[data-acao="salvar"]').addEventListener('click', async ()=>{
+          const novaMusica = {
+            titulo: bloco.querySelector('[data-campo="titulo"]').value,
+            videoUrl: inputVideo.value
+          };
+          try{
+            await fb.atualizarMusica(m.id, novaMusica);
+            configAtual.musicas[i] = { ...m, ...novaMusica };
+            mostrarMsg('adminMsgMusicas', `Música ${i+1} salva! ✓`);
+          }catch(err){
+            mostrarMsg('adminMsgMusicas','Erro ao salvar: '+err.message, 5000);
+          }
+        });
+
+        bloco.querySelector('[data-acao="remover"]').addEventListener('click', async ()=>{
+          try{
+            await fb.removerMusica(m.id);
+            configAtual.musicas.splice(i,1);
+            mostrarMsg('adminMsgMusicas', 'Música removida.');
+          }catch(err){
+            mostrarMsg('adminMsgMusicas','Erro ao remover: '+err.message, 5000);
+          }
+          renderAdminMusicas();
+        });
+      });
+    }
+
+    document.getElementById('adminAdicionarMusica').addEventListener('click', async ()=>{
+      const titulo = document.getElementById('adminNovaMusicaTitulo').value;
+      const videoUrl = document.getElementById('adminNovaMusicaUrl').value;
+      if(!videoUrl.trim()){ mostrarMsg('adminMsgMusicas','Cole o link do YouTube primeiro.'); return; }
+      configAtual.musicas = configAtual.musicas || [];
+      const ordem = configAtual.musicas.length;
+      const novaMusica = { titulo, videoUrl, ordem };
+      try{
+        const id = await fb.adicionarMusica(novaMusica);
+        configAtual.musicas.push({ id, ...novaMusica });
+        mostrarMsg('adminMsgMusicas', 'Música adicionada! ✓');
+        document.getElementById('adminNovaMusicaTitulo').value = '';
+        document.getElementById('adminNovaMusicaUrl').value = '';
+        renderAdminMusicas();
+      }catch(err){
+        mostrarMsg('adminMsgMusicas','Erro ao adicionar: '+err.message, 5000);
+      }
+    });
 
     // ---------- Polaroids (coleção própria "polaroids": um documento por
     // polaroid, com id, img, legenda e ordem) ----------
