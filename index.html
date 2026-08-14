@@ -218,6 +218,8 @@ body.modo-admin #carregandoSite{ display:none !important; }
   overflow-y:auto;
   padding-top:44px;
   position:relative;
+  align-items:center;
+  justify-content:flex-start;
 }
 #telaGirassol .titulo-tema{ color:var(--girassol-dourado-forte); }
 #telaGirassol .titulo-tema::before{ background:rgba(122,154,63,.22); }
@@ -285,6 +287,8 @@ body.modo-admin #carregandoSite{ display:none !important; }
   overflow-y:auto;
   padding-top:44px;
   position:relative;
+  align-items:center;
+  justify-content:flex-start;
 }
 #telaVersiculo .titulo-tema{ color:var(--biblia-marrom); }
 #telaVersiculo .titulo-tema::before{ background:rgba(199,154,68,.28); }
@@ -331,6 +335,8 @@ body.modo-admin #carregandoSite{ display:none !important; }
   background:linear-gradient(165deg, #3d1220 0%, #6b1c30 45%, var(--vermelho-detalhe) 130%);
   overflow-y:auto;
   padding-top:44px;
+  align-items:center;
+  justify-content:flex-start;
 }
 #telaMusica .titulo-tema{ color:#ffd9e6; }
 #telaMusica .titulo-tema::before{ background:rgba(255,255,255,.18); }
@@ -438,6 +444,11 @@ body.modo-admin #carregandoSite{ display:none !important; }
 }
 .polaroid.focado .moldura{ height:min(80vw,300px); }
 .polaroid.focado .legenda{ font-size:18px; margin-top:10px; }
+.polaroid.focado.fechando{
+  opacity:0 !important;
+  transform:translate(-50%,-50%) scale(.85) !important;
+  transition:opacity .3s ease, transform .3s ease !important;
+}
 #album-blur{
   position:fixed; inset:0; background:rgba(80,50,60,.3); backdrop-filter:blur(8px);
   z-index:940; opacity:0; pointer-events:none; transition:opacity .5s;
@@ -1562,7 +1573,13 @@ function iniciarSite(){
   // Começa com o conteúdo padrão/genérico até o Firestore responder.
   let polaroidsAtuais = POLAROIDS_PADRAO;
   const polContainer = document.getElementById('polaroids-container');
+  // Enquanto uma foto estiver aberta (ou fechando), não reconstruímos a
+  // grade — mesmo que o Firestore mande uma atualização nesse meio-tempo.
+  // Isso evita que a foto aberta (que fica temporariamente fora da grade,
+  // em document.body) perca sua referência e fique "perdida"/fixa na tela.
+  // Assim que ela fecha, a grade é reconstruída com os dados mais atuais.
   function renderPolaroids(){
+    if(polaroidAberta) return;
     polContainer.innerHTML = '';
     (polaroidsAtuais||[]).forEach((p,i)=>{
       const src = typeof p === 'string' ? p : (p.img||'');
@@ -1582,15 +1599,12 @@ function iniciarSite(){
   }
 
   let polaroidAberta = null;
-  let polaroidPlaceholder = null;
   function focarPolaroid(div){
+    if(polaroidAberta) return; // já tem uma foto aberta/fechando: ignora novo toque
     polaroidAberta = div;
-    div.dataset.origStyle = div.getAttribute('style') || '';
     // move o polaroid para fora do container com scroll-snap: em alguns
     // navegadores (Safari/iOS), position:fixed dentro de um contêiner com
     // scroll-snap não fica realmente fixo em relação à tela.
-    polaroidPlaceholder = document.createComment('polaroid-placeholder');
-    div.parentNode.insertBefore(polaroidPlaceholder, div);
     document.body.appendChild(div);
     document.getElementById('album-blur').classList.add('aberto');
     document.getElementById('voltar-polaroid').classList.add('aberto');
@@ -1600,16 +1614,24 @@ function iniciarSite(){
   document.getElementById('album-blur').addEventListener('click', fecharPolaroid);
   function fecharPolaroid(){
     if(!polaroidAberta) return;
-    polaroidAberta.classList.remove('focado');
-    polaroidAberta.setAttribute('style', polaroidAberta.dataset.origStyle);
-    if(polaroidPlaceholder && polaroidPlaceholder.parentNode){
-      polaroidPlaceholder.parentNode.insertBefore(polaroidAberta, polaroidPlaceholder);
-      polaroidPlaceholder.remove();
-    }
+    const div = polaroidAberta;
     document.getElementById('album-blur').classList.remove('aberto');
     document.getElementById('voltar-polaroid').classList.remove('aberto');
-    polaroidAberta = null;
-    polaroidPlaceholder = null;
+    div.classList.add('fechando');
+    let finalizado = false;
+    function finalizar(){
+      if(finalizado) return;
+      finalizado = true;
+      div.removeEventListener('transitionend', finalizar);
+      if(div.parentNode) div.parentNode.removeChild(div);
+      div.classList.remove('focado','fechando');
+      polaroidAberta = null;
+      // reconstrói a grade com os dados mais atuais (pode ter chegado
+      // alguma atualização do Firestore enquanto a foto estava aberta)
+      renderPolaroids();
+    }
+    div.addEventListener('transitionend', finalizar, { once:true });
+    setTimeout(finalizar, 500); // segurança, caso o evento não dispare
   }
 
   // ---------- TELA 4 — Céu estrelado ----------
